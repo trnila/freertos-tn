@@ -630,6 +630,8 @@ add_executable(rpmsg_lite_pingpong_rtos_linux_remote.elf
 "${ProjDirPath}/../fsl_iomuxc.h"
 "${ProjDirPath}/../board.c"
 "${ProjDirPath}/../board.h"
+"${ProjDirPath}/../rsc_table.c"
+"${ProjDirPath}/../rsc_table.h"
 "${ProjDirPath}/../clock_config.c"
 "${ProjDirPath}/../clock_config.h"
 "${ProjDirPath}/../main_remote.c"

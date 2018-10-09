@@ -77,6 +77,12 @@ SECTIONS
   __VECTOR_RAM = __VECTOR_TABLE;
   __RAM_VECTOR_TABLE_SIZE_BYTES = 0x0;
 
+  .resource_table : {
+    . = ALIGN(4); 
+    KEEP(*(.resource_table));
+    . = ALIGN(4); 
+  } > m_text
+
     /* The program code and other data goes into internal RAM */
   .text :
   {
