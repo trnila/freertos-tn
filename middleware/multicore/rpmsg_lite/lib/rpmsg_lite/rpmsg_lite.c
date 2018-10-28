@@ -779,6 +779,8 @@ int rpmsg_lite_release_rx_buffer(struct rpmsg_lite_instance *rpmsg_lite_dev, voi
                                        reserved->idx);
 
     env_unlock_mutex(rpmsg_lite_dev->lock);
+    /* notify remote processor about consumed rx buffer */
+    virtqueue_kick(rpmsg_lite_dev->rvq);
 
     return RL_SUCCESS;
 }
