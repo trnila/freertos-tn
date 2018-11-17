@@ -69,6 +69,8 @@ add_library(mcuxpressosdk
   "${M4SDK_PATH}/devices/MIMX8MQ6/drivers/fsl_ecspi.c"
   "${M4SDK_PATH}/devices/MIMX8MQ6/drivers/fsl_gpio.h"
   "${M4SDK_PATH}/devices/MIMX8MQ6/drivers/fsl_gpio.c"
+  "${M4SDK_PATH}/devices/MIMX8MQ6/drivers/fsl_gpt.h"
+  "${M4SDK_PATH}/devices/MIMX8MQ6/drivers/fsl_gpt.c"
   "${M4SDK_PATH}/devices/MIMX8MQ6/drivers/fsl_pwm.h"
   "${M4SDK_PATH}/devices/MIMX8MQ6/drivers/fsl_pwm.c"
   "${M4SDK_PATH}/devices/MIMX8MQ6/drivers/fsl_i2c.h"
