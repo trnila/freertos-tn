@@ -191,6 +191,17 @@ struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr,
 struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, int link_id, uint32_t init_flags);
 #endif
 
+struct rpmsg_lite_instance *rpmsg_lite_remote_init2(void *shmem_ring1,
+                                                   void *shmem_ring2,
+                                                   uint32_t align,
+                                                   uint16_t num_descs,
+                                                   int link_id,
+                                                   uint32_t init_flags
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+                                                   ,struct rpmsg_lite_instance *static_context
+#endif
+);
+
 /*!
  *
  * @brief Deinitialized the RPMsg-Lite communication stack

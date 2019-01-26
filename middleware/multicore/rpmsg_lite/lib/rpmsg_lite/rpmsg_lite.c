@@ -963,15 +963,17 @@ struct rpmsg_lite_instance *rpmsg_lite_master_init(void *shmem_addr,
     return rpmsg_lite_dev;
 }
 
-#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
-struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr,
+
+struct rpmsg_lite_instance *rpmsg_lite_remote_init2(void *shmem_ring1,
+                                                   void *shmem_ring2,
+                                                   uint32_t align,
+                                                   uint16_t num_descs,
                                                    int link_id,
-                                                   uint32_t init_flags,
-                                                   struct rpmsg_lite_instance *static_context)
-#else
-struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, int link_id, uint32_t init_flags)
+                                                   uint32_t init_flags
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+                                                   ,struct rpmsg_lite_instance *static_context
 #endif
-{
+) {
     int status;
     void (*callback[2])(struct virtqueue *vq);
     const char *vq_names[2];
@@ -983,7 +985,7 @@ struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, int link_id
     if (link_id > RL_PLATFORM_HIGHEST_LINK_ID)
         return NULL;
 
-    if (!shmem_addr)
+    if (!shmem_ring1 || !shmem_ring2)
         return NULL;
 
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
@@ -1016,9 +1018,9 @@ struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, int link_id
     /* Create virtqueue for each vring. */
     for (idx = 0; idx < 2; idx++)
     {
-        ring_info.phy_addr = (void *)((unsigned long)shmem_addr + (unsigned long)((idx == 0) ? (0) : (VRING_SIZE)));
-        ring_info.align = VRING_ALIGN;
-        ring_info.num_descs = RL_BUFFER_COUNT;
+        ring_info.phy_addr = idx == 0 ? shmem_ring1 : shmem_ring2; 
+        ring_info.align = align;
+        ring_info.num_descs = num_descs;
 
 #if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
         status = virtqueue_create_static(RL_GET_VQ_ID(link_id, idx), (char *)vq_names[idx], &ring_info, callback[idx],
@@ -1064,6 +1066,28 @@ struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, int link_id
     env_enable_interrupt(rpmsg_lite_dev->tvq->vq_queue_index);
 
     return rpmsg_lite_dev;
+}
+
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr,
+                                                   int link_id,
+                                                   uint32_t init_flags,
+                                                   struct rpmsg_lite_instance *static_context)
+#else
+struct rpmsg_lite_instance *rpmsg_lite_remote_init(void *shmem_addr, int link_id, uint32_t init_flags)
+#endif
+{
+    return rpmsg_lite_remote_init2(
+        shmem_addr,
+        shmem_addr + VRING_SIZE,
+        VRING_ALIGN,
+        RL_BUFFER_COUNT,
+        link_id,
+        init_flags
+#if defined(RL_USE_STATIC_API) && (RL_USE_STATIC_API == 1)
+        ,static_context
+#endif        
+    );
 }
 
 /*******************************************
