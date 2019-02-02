@@ -93,6 +93,14 @@ SECTIONS
     . = ALIGN(4);
   } > m_text
 
+  .resource_table : {
+    *(.resource_table) /* place user .resource_table */
+    /* place default resource table that is used if no .resource_table provided from user */
+    LONG(1) /* version 1 */
+    LONG(0) /* 0 resources */
+    . = ALIGN(0x100);
+  }
+
   .ARM.extab :
   {
     *(.ARM.extab* .gnu.linkonce.armextab.*)
