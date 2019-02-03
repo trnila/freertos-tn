@@ -85,7 +85,3 @@ struct rpmsg_lite_instance* create_rpmsg_from_resources() {
 
   return rpmsg;
 }
-
-#if defined __cplusplus
-}
-#endif
