@@ -29,6 +29,12 @@ add_library(freertos
   "${M4SDK_PATH}/rtos/freertos/Source/portable/GCC/ARM_CM4F/port.c"
   "${M4SDK_PATH}/rtos/freertos/Source/portable/GCC/ARM_CM4F/portmacro.h"
   "${M4SDK_PATH}/rtos/freertos/Source/portable/MemMang/heap_4.c"
+  "${M4SDK_PATH}/devices/MIMX8MQ6/drivers/fsl_i2c_freertos.h"
+  "${M4SDK_PATH}/devices/MIMX8MQ6/drivers/fsl_i2c_freertos.c"
+  "${M4SDK_PATH}/devices/MIMX8MQ6/drivers/fsl_ecspi_freertos.h"
+  "${M4SDK_PATH}/devices/MIMX8MQ6/drivers/fsl_ecspi_freertos.c"
+  "${M4SDK_PATH}/devices/MIMX8MQ6/drivers/fsl_uart_freertos.h"
+  "${M4SDK_PATH}/devices/MIMX8MQ6/drivers/fsl_uart_freertos.c"
 )
 
 target_include_directories(freertos
@@ -37,3 +43,5 @@ target_include_directories(freertos
     ${M4SDK_PATH}/rtos/freertos/Source/portable/GCC/ARM_CM4F
     ${M4SDK_PATH}/rtos/freertos/Source/include
 )
+
+target_link_libraries(freertos mcuxpressosdk)
