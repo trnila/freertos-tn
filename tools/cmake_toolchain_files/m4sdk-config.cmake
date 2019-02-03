@@ -26,7 +26,7 @@ set(COMMON_FLAGS "${COMMON_FLAGS} -MP")
 
 set(CMAKE_ASM_FLAGS "${COMMON_FLAGS}")
 set(CMAKE_C_FLAGS "${COMMON_FLAGS}")
-set(CMAKE_CXX_FLAGS "${COMMON_FLAGS} -fno-rtti -fno-exceptions")
+set(CMAKE_CXX_FLAGS "${COMMON_FLAGS} -fno-rtti -fno-exceptions --specs=nosys.specs")
 set(CMAKE_EXE_LINKER_FLAGS "${COMMON_FLAGS} --specs=nano.specs --specs=nosys.specs -Xlinker --gc-sections -Xlinker -static -Xlinker -z -Xlinker muldefs")
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -T${M4SDK_PATH}/boards/pico-8m-m4/skel/MIMX8MQ6xxxJZ_cm4_ram.ld -static")
