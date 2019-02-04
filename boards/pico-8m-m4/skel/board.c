@@ -71,9 +71,9 @@ void BOARD_InitMemory(void)
     MPU->RBAR = (0x20000000U & MPU_RBAR_ADDR_Msk) | MPU_RBAR_VALID_Msk | (0 << MPU_RBAR_REGION_Pos);
     MPU->RASR = (0x3 << MPU_RASR_AP_Pos) | (28 << MPU_RASR_SIZE_Pos) | MPU_RASR_ENABLE_Msk;
 
-    /* configure full aceess to code TCML (256 kbytes - 2^18) */
+    /* configure full aceess to code TCML (128 kbytes - 2^17) */
     MPU->RBAR = (0x1FFF0000U & MPU_RBAR_ADDR_Msk) | MPU_RBAR_VALID_Msk | (1 << MPU_RBAR_REGION_Pos);
-    MPU->RASR = (0x3 << MPU_RASR_AP_Pos) | (17 << MPU_RASR_SIZE_Pos) | MPU_RASR_ENABLE_Msk;
+    MPU->RASR = (0x3 << MPU_RASR_AP_Pos) | (16 << MPU_RASR_SIZE_Pos) | MPU_RASR_ENABLE_Msk;
 
     /* configure access to rpmsg in DDR (1 MB - 2^20) */
     MPU->RBAR = (0xB8000000 & MPU_RBAR_ADDR_Msk) | MPU_RBAR_VALID_Msk | (2 << MPU_RBAR_REGION_Pos);
