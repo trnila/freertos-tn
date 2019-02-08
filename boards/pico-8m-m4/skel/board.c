@@ -63,19 +63,19 @@ void BOARD_InitMemory(void)
 
     /* configure full access to TCMU (128 kbytes)- 2^17 */
     MPU->RBAR = (0x20000000U & MPU_RBAR_ADDR_Msk) | MPU_RBAR_VALID_Msk | (0 << MPU_RBAR_REGION_Pos);
-    MPU->RASR = (0x3 << MPU_RASR_AP_Pos) | (16 << MPU_RASR_SIZE_Pos) | MPU_RASR_ENABLE_Msk;
+    MPU->RASR = (0x3 << MPU_RASR_AP_Pos) | (ARM_MPU_REGION_SIZE_128KB << MPU_RASR_SIZE_Pos) | MPU_RASR_ENABLE_Msk;
 
     /* configure full aceess to code TCML (128 kbytes - 2^17) */
     MPU->RBAR = (0x1FFF0000U & MPU_RBAR_ADDR_Msk) | MPU_RBAR_VALID_Msk | (1 << MPU_RBAR_REGION_Pos);
-    MPU->RASR = (0x3 << MPU_RASR_AP_Pos) | (16 << MPU_RASR_SIZE_Pos) | MPU_RASR_ENABLE_Msk;
+    MPU->RASR = (0x3 << MPU_RASR_AP_Pos) | (ARM_MPU_REGION_SIZE_128KB << MPU_RASR_SIZE_Pos) | MPU_RASR_ENABLE_Msk;
 
     /* configure access to rpmsg in DDR (1 MB - 2^20) */
     MPU->RBAR = (0xB8000000 & MPU_RBAR_ADDR_Msk) | MPU_RBAR_VALID_Msk | (2 << MPU_RBAR_REGION_Pos);
-    MPU->RASR = (0x3 << MPU_RASR_AP_Pos) | (19 << MPU_RASR_SIZE_Pos) | MPU_RASR_ENABLE_Msk;
+    MPU->RASR = (0x3 << MPU_RASR_AP_Pos) | (ARM_MPU_REGION_SIZE_1MB << MPU_RASR_SIZE_Pos) | MPU_RASR_ENABLE_Msk;
 
     /* configure full access to peripherals 16 MB (last 4 MB is reserved) - 2^24 */
     MPU->RBAR = (0x30000000U & MPU_RBAR_ADDR_Msk) | MPU_RBAR_VALID_Msk | (3 << MPU_RBAR_REGION_Pos);
-    MPU->RASR = (0x3 << MPU_RASR_AP_Pos) | (23 << MPU_RASR_SIZE_Pos) | MPU_RASR_ENABLE_Msk;
+    MPU->RASR = (0x3 << MPU_RASR_AP_Pos) | (ARM_MPU_REGION_SIZE_16MB << MPU_RASR_SIZE_Pos) | MPU_RASR_ENABLE_Msk;
 
     /* enable MemManage handlers */
     SCB->SHCSR |= SCB_SHCSR_MEMFAULTENA_Msk;
