@@ -56,20 +56,14 @@ void BOARD_InitDebugConsole(void)
 /* Initialize MPU, configure non-cacheable memory */
 void BOARD_InitMemory(void)
 {
-
-    extern uint32_t __CACHE_REGION_START[];
-    extern uint32_t __CACHE_REGION_SIZE[];
-    uint32_t cacheStart = (uint32_t)__CACHE_REGION_START;
-    uint32_t size = (uint32_t)__CACHE_REGION_SIZE;
-    uint32_t i = 0;
     /* Make sure outstanding transfers are done. */
     __DMB();
     /* Disable the MPU. */
     MPU->CTRL = 0;
 
-    /* configure full access to TCMU + peripherals, etc ~512M - 2^29 */
+    /* configure full access to TCMU (128 kbytes)- 2^17 */
     MPU->RBAR = (0x20000000U & MPU_RBAR_ADDR_Msk) | MPU_RBAR_VALID_Msk | (0 << MPU_RBAR_REGION_Pos);
-    MPU->RASR = (0x3 << MPU_RASR_AP_Pos) | (28 << MPU_RASR_SIZE_Pos) | MPU_RASR_ENABLE_Msk;
+    MPU->RASR = (0x3 << MPU_RASR_AP_Pos) | (16 << MPU_RASR_SIZE_Pos) | MPU_RASR_ENABLE_Msk;
 
     /* configure full aceess to code TCML (128 kbytes - 2^17) */
     MPU->RBAR = (0x1FFF0000U & MPU_RBAR_ADDR_Msk) | MPU_RBAR_VALID_Msk | (1 << MPU_RBAR_REGION_Pos);
@@ -78,6 +72,10 @@ void BOARD_InitMemory(void)
     /* configure access to rpmsg in DDR (1 MB - 2^20) */
     MPU->RBAR = (0xB8000000 & MPU_RBAR_ADDR_Msk) | MPU_RBAR_VALID_Msk | (2 << MPU_RBAR_REGION_Pos);
     MPU->RASR = (0x3 << MPU_RASR_AP_Pos) | (19 << MPU_RASR_SIZE_Pos) | MPU_RASR_ENABLE_Msk;
+
+    /* configure full access to peripherals 16 MB (last 4 MB is reserved) - 2^24 */
+    MPU->RBAR = (0x30000000U & MPU_RBAR_ADDR_Msk) | MPU_RBAR_VALID_Msk | (3 << MPU_RBAR_REGION_Pos);
+    MPU->RASR = (0x3 << MPU_RASR_AP_Pos) | (23 << MPU_RASR_SIZE_Pos) | MPU_RASR_ENABLE_Msk;
 
     /* enable MemManage handlers */
     SCB->SHCSR |= SCB_SHCSR_MEMFAULTENA_Msk;
@@ -117,7 +115,6 @@ __attribute__((weak)) void HardFault_Handler(void) {
     printf("hard fault\r\n");
     for(;;);
 }
-
 
 __attribute__((weak)) void MemManage_Handler(void) {
     // [0] - fetch from non-executable location
