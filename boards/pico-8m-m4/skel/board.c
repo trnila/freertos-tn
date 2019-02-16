@@ -63,23 +63,38 @@ void BOARD_InitMemory(void)
 
     /* configure full access to TCMU (128 kbytes)- 2^17 */
     MPU->RBAR = (0x20000000U & MPU_RBAR_ADDR_Msk) | MPU_RBAR_VALID_Msk | (0 << MPU_RBAR_REGION_Pos);
-    MPU->RASR = (0x3 << MPU_RASR_AP_Pos) | (ARM_MPU_REGION_SIZE_128KB << MPU_RASR_SIZE_Pos) | MPU_RASR_ENABLE_Msk;
+    MPU->RASR = MPU_RASR_ENABLE_Msk
+        | (0x3 << MPU_RASR_AP_Pos)
+        | (1 << MPU_RASR_TEX_Pos)
+        | (1 << MPU_RASR_XN_Pos) // not executable
+        |(ARM_MPU_REGION_SIZE_128KB << MPU_RASR_SIZE_Pos);
 
     /* configure full aceess to code TCML (128 kbytes - 2^17) */
     MPU->RBAR = (0x1FFF0000U & MPU_RBAR_ADDR_Msk) | MPU_RBAR_VALID_Msk | (1 << MPU_RBAR_REGION_Pos);
-    MPU->RASR = (0x3 << MPU_RASR_AP_Pos) | (ARM_MPU_REGION_SIZE_128KB << MPU_RASR_SIZE_Pos) | MPU_RASR_ENABLE_Msk;
-
-    /* configure access to rpmsg in DDR (1 MB - 2^20) */
-    MPU->RBAR = (0xB8000000 & MPU_RBAR_ADDR_Msk) | MPU_RBAR_VALID_Msk | (2 << MPU_RBAR_REGION_Pos);
-    MPU->RASR = (0x3 << MPU_RASR_AP_Pos) | (ARM_MPU_REGION_SIZE_1MB << MPU_RASR_SIZE_Pos) | MPU_RASR_ENABLE_Msk;
+    MPU->RASR = MPU_RASR_ENABLE_Msk
+        | (0x3 << MPU_RASR_AP_Pos)
+        | (1 << MPU_RASR_TEX_Pos)
+        | (ARM_MPU_REGION_SIZE_128KB << MPU_RASR_SIZE_Pos);
 
     /* configure full access to peripherals 16 MB (last 4 MB is reserved) - 2^24 */
-    MPU->RBAR = (0x30000000U & MPU_RBAR_ADDR_Msk) | MPU_RBAR_VALID_Msk | (3 << MPU_RBAR_REGION_Pos);
-    MPU->RASR = (0x3 << MPU_RASR_AP_Pos) | (ARM_MPU_REGION_SIZE_16MB << MPU_RASR_SIZE_Pos) | MPU_RASR_ENABLE_Msk;
+    MPU->RBAR = (0x30000000U & MPU_RBAR_ADDR_Msk) | MPU_RBAR_VALID_Msk | (2 << MPU_RBAR_REGION_Pos);
+    MPU->RASR = MPU_RASR_ENABLE_Msk
+        | (0x3 << MPU_RASR_AP_Pos)
+        | (1 << MPU_RASR_XN_Pos) // not executable
+        | (ARM_MPU_REGION_SIZE_16MB << MPU_RASR_SIZE_Pos);
+
+    /* configure access to rpmsg in DDR (1 MB - 2^20) */
+    MPU->RBAR = (0xB8000000 & MPU_RBAR_ADDR_Msk) | MPU_RBAR_VALID_Msk | (3 << MPU_RBAR_REGION_Pos);
+    MPU->RASR = MPU_RASR_ENABLE_Msk
+        | (0x3 << MPU_RASR_AP_Pos)
+        | (1 << MPU_RASR_XN_Pos) // not executable
+        | (1 << MPU_RASR_S_Pos) // shareable with linux cores
+        | (ARM_MPU_REGION_SIZE_1MB << MPU_RASR_SIZE_Pos);
+
 
     /* enable MemManage handlers */
     SCB->SHCSR |= SCB_SHCSR_MEMFAULTENA_Msk;
-    /* enable mpu */
+    /* enable mpu and enable MPU for privileged mode also */
     MPU->CTRL = MPU_CTRL_ENABLE_Msk;
 
     /* Memory barriers to ensure subsequence data & instruction
