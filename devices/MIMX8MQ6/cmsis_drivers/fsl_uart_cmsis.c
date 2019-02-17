@@ -18,8 +18,12 @@
  * limitations under the License.
  */
 
-
 #include "fsl_uart_cmsis.h"
+
+/* Component ID definition, used by tools. */
+#ifndef FSL_COMPONENT_ID
+#define FSL_COMPONENT_ID "platform.drivers.iuart_cmsis"
+#endif
 
 #if ((RTE_USART1 && defined(UART1)) || (RTE_USART2 && defined(UART2)) || (RTE_USART3 && defined(UART3)) || \
      (RTE_USART4 && defined(UART4)))
@@ -30,7 +34,7 @@
  * ARMCC does not support split the data section automatically, so the driver
  * needs to split the data to separate sections explicitly, to reduce codesize.
  */
-#if defined(__CC_ARM)
+#if defined(__CC_ARM) || defined(__ARMCC_VERSION)
 #define ARMCC_SECTION(section_name) __attribute__((section(section_name)))
 #endif
 
@@ -47,6 +51,31 @@ typedef struct _cmsis_uart_non_blocking_driver_state
     ARM_USART_SignalEvent_t cb_event; /*!< Callback function.        */
     uint8_t flags;                    /*!< Control and state flags.  */
 } cmsis_uart_non_blocking_driver_state_t;
+#if (defined(FSL_FEATURE_SOC_SDMA_COUNT) && FSL_FEATURE_SOC_SDMA_COUNT)
+typedef struct _cmsis_uart_sdma_resource
+{
+    SDMAARM_Type *txSdmaBase; /*!< SDMA peripheral base address for TX. */
+    uint32_t txSdmaChannel;   /*!< SDMA channel for UART TX.            */
+    uint32_t txSdmaRequest;   /*!< TX SDMA request source.              */
+    uint32_t txSdmaPriority;  /*!< TX SDMA channel priority.            */
+
+    SDMAARM_Type *rxSdmaBase; /*!< SDMA peripheral base address for RX. */
+    uint32_t rxSdmaChannel;   /*!< SDMA channel for UART RX.            */
+    uint32_t rxSdmaRequest;   /*!< RX SDMA request source.              */
+    uint32_t rxSdmaPriority;  /*!< RX SDMA channel priority.            */
+} cmsis_uart_sdma_resource_t;
+
+typedef struct _cmsis_uart_sdma_driver_state
+{
+    cmsis_uart_resource_t *resource;          /*!< UART basic resource.       */
+    cmsis_uart_sdma_resource_t *sdmaResource; /*!< UART SDMA resource.        */
+    uart_sdma_handle_t *handle;               /*!< UART SDMA transfer handle. */
+    sdma_handle_t *rxHandle;                  /*!< SDMA RX handle.            */
+    sdma_handle_t *txHandle;                  /*!< SDMA TX handle.            */
+    ARM_USART_SignalEvent_t cb_event;         /*!< Callback function.         */
+    uint8_t flags;                            /*!< Control and state flags.   */
+} cmsis_uart_sdma_driver_state_t;
+#endif
 
 enum _uart_transfer_states
 {
@@ -715,7 +744,7 @@ AT_NONCACHEABLE_SECTION_ALIGN(sdma_handle_t UART1_SdmaRxHandle, 4);
 AT_NONCACHEABLE_SECTION_ALIGN(sdma_context_data_t UART1_SdmaTxContext, 4);
 AT_NONCACHEABLE_SECTION_ALIGN(sdma_context_data_t UART1_SdmaRxContext, 4);
 
-#if defined(__CC_ARM)
+#if defined(__CC_ARM) || defined(__ARMCC_VERSION)
 ARMCC_SECTION("uart1_sdma_driver_state")
 cmsis_uart_sdma_driver_state_t UART1_SdmaDriverState = {
 #else
@@ -738,7 +767,7 @@ static int32_t UART1_SdmaUninitialize(void)
 
 static int32_t UART1_SdmaPowerControl(ARM_POWER_STATE state)
 {
-    return UART_SdmaPowerControl(state, &UART1_SdmaDriverState, &UART1_SdmaTxContext, &UART1_SdmaRxContext);
+    return UART_SdmaPowerControl(state, &UART1_SdmaDriverState, &UART1_SdmaRxContext, &UART1_SdmaTxContext);
 }
 
 static int32_t UART1_SdmaSend(const void *data, uint32_t num)
@@ -784,7 +813,7 @@ uart_handle_t UART1_Handle;
 static uint8_t uart1_rxRingBuffer[USART_RX_BUFFER_LEN];
 #endif
 
-#if defined(__CC_ARM)
+#if defined(__CC_ARM) || defined(__ARMCC_VERSION)
 ARMCC_SECTION("uart1_non_blocking_driver_state")
 cmsis_uart_non_blocking_driver_state_t UART1_NonBlockingDriverState = {
 #else
@@ -918,7 +947,7 @@ AT_NONCACHEABLE_SECTION_ALIGN(sdma_handle_t UART2_SdmaRxHandle, 4);
 AT_NONCACHEABLE_SECTION_ALIGN(sdma_context_data_t UART2_SdmaTxContext, 4);
 AT_NONCACHEABLE_SECTION_ALIGN(sdma_context_data_t UART2_SdmaRxContext, 4);
 
-#if defined(__CC_ARM)
+#if defined(__CC_ARM) || defined(__ARMCC_VERSION)
 ARMCC_SECTION("uart2_sdma_driver_state")
 cmsis_uart_sdma_driver_state_t UART2_SdmaDriverState = {
 #else
@@ -941,7 +970,7 @@ static int32_t UART2_SdmaUninitialize(void)
 
 static int32_t UART2_SdmaPowerControl(ARM_POWER_STATE state)
 {
-    return UART_SdmaPowerControl(state, &UART2_SdmaDriverState, &UART2_SdmaTxContext, &UART2_SdmaRxContext);
+    return UART_SdmaPowerControl(state, &UART2_SdmaDriverState, &UART2_SdmaRxContext, &UART2_SdmaTxContext);
 }
 
 static int32_t UART2_SdmaSend(const void *data, uint32_t num)
@@ -987,7 +1016,7 @@ uart_handle_t UART2_Handle;
 static uint8_t uart2_rxRingBuffer[USART_RX_BUFFER_LEN];
 #endif
 
-#if defined(__CC_ARM)
+#if defined(__CC_ARM) || defined(__ARMCC_VERSION)
 ARMCC_SECTION("uart2_non_blocking_driver_state")
 cmsis_uart_non_blocking_driver_state_t UART2_NonBlockingDriverState = {
 #else
@@ -1121,7 +1150,7 @@ AT_NONCACHEABLE_SECTION_ALIGN(sdma_handle_t UART3_SdmaRxHandle, 4);
 AT_NONCACHEABLE_SECTION_ALIGN(sdma_context_data_t UART3_SdmaTxContext, 4);
 AT_NONCACHEABLE_SECTION_ALIGN(sdma_context_data_t UART3_SdmaRxContext, 4);
 
-#if defined(__CC_ARM)
+#if defined(__CC_ARM) || defined(__ARMCC_VERSION)
 ARMCC_SECTION("uart3_sdma_driver_state")
 cmsis_uart_sdma_driver_state_t UART3_SdmaDriverState = {
 #else
@@ -1144,7 +1173,7 @@ static int32_t UART3_SdmaUninitialize(void)
 
 static int32_t UART3_SdmaPowerControl(ARM_POWER_STATE state)
 {
-    return UART_SdmaPowerControl(state, &UART3_SdmaDriverState, &UART3_SdmaTxContext, &UART3_SdmaRxContext);
+    return UART_SdmaPowerControl(state, &UART3_SdmaDriverState, &UART3_SdmaRxContext, &UART3_SdmaTxContext);
 }
 
 static int32_t UART3_SdmaSend(const void *data, uint32_t num)
@@ -1190,7 +1219,7 @@ uart_handle_t UART3_Handle;
 static uint8_t uart3_rxRingBuffer[USART_RX_BUFFER_LEN];
 #endif
 
-#if defined(__CC_ARM)
+#if defined(__CC_ARM) || defined(__ARMCC_VERSION)
 ARMCC_SECTION("uart3_non_blocking_driver_state")
 cmsis_uart_non_blocking_driver_state_t UART3_NonBlockingDriverState = {
 #else
@@ -1324,7 +1353,7 @@ AT_NONCACHEABLE_SECTION_ALIGN(sdma_handle_t UART4_SdmaRxHandle, 4);
 AT_NONCACHEABLE_SECTION_ALIGN(sdma_context_data_t UART4_SdmaTxContext, 4);
 AT_NONCACHEABLE_SECTION_ALIGN(sdma_context_data_t UART4_SdmaRxContext, 4);
 
-#if defined(__CC_ARM)
+#if defined(__CC_ARM) || defined(__ARMCC_VERSION)
 ARMCC_SECTION("uart4_sdma_driver_state")
 cmsis_uart_sdma_driver_state_t UART4_SdmaDriverState = {
 #else
@@ -1347,7 +1376,7 @@ static int32_t UART4_SdmaUninitialize(void)
 
 static int32_t UART4_SdmaPowerControl(ARM_POWER_STATE state)
 {
-    return UART_SdmaPowerControl(state, &UART4_SdmaDriverState, &UART4_SdmaTxContext, &UART4_SdmaRxContext);
+    return UART_SdmaPowerControl(state, &UART4_SdmaDriverState, &UART4_SdmaRxContext, &UART4_SdmaTxContext);
 }
 
 static int32_t UART4_SdmaSend(const void *data, uint32_t num)
@@ -1393,7 +1422,7 @@ uart_handle_t UART4_Handle;
 static uint8_t uart4_rxRingBuffer[USART_RX_BUFFER_LEN];
 #endif
 
-#if defined(__CC_ARM)
+#if defined(__CC_ARM) || defined(__ARMCC_VERSION)
 ARMCC_SECTION("uart4_non_blocking_driver_state")
 cmsis_uart_non_blocking_driver_state_t UART4_NonBlockingDriverState = {
 #else

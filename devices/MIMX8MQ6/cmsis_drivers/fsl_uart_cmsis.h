@@ -18,7 +18,6 @@
  * limitations under the License.
  */
 
-
 #ifndef _FSL_UART_CMSIS_H_
 #define _FSL_UART_CMSIS_H_
 
@@ -26,7 +25,9 @@
 #include "Driver_USART.h"
 #include "RTE_Device.h"
 #include "fsl_uart.h"
-
+#if (defined(FSL_FEATURE_SOC_SDMA_COUNT) && FSL_FEATURE_SOC_SDMA_COUNT)
+#include "fsl_uart_sdma.h"
+#endif
 #if defined(UART1)
 extern ARM_DRIVER_USART Driver_USART1;
 #endif /* UART1 */

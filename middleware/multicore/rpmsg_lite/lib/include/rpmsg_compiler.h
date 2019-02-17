@@ -71,7 +71,11 @@
 #endif
 
 /* ARM GCC */
-#elif defined(__CC_ARM)
+#elif defined(__CC_ARM) || (defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050))
+
+#if (defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050))
+#include <arm_compat.h>
+#endif
 
 #define MEM_BARRIER() __schedule_barrier()
 

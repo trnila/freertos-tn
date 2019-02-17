@@ -1,42 +1,22 @@
 /*
- * The Clear BSD License
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
  * Copyright 2016-2017 NXP
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted (subject to the limitations in the disclaimer below) provided
- * that the following conditions are met:
- *
- * o Redistributions of source code must retain the above copyright notice, this list
- *   of conditions and the following disclaimer.
- *
- * o Redistributions in binary form must reproduce the above copyright notice, this
- *   list of conditions and the following disclaimer in the documentation and/or
- *   other materials provided with the distribution.
- *
- * o Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from this
- *   software without specific prior written permission.
- *
- * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS LICENSE.
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "fsl_ecspi.h"
 
 /*******************************************************************************
- * Definitons
+ * Definitions
  ******************************************************************************/
+
+/* Component ID definition, used by tools. */
+#ifndef FSL_COMPONENT_ID
+#define FSL_COMPONENT_ID "platform.drivers.ecspi"
+#endif
+
 /*! @brief ECSPI transfer state, which is used for ECSPI transactiaonl APIs' internal state. */
 enum _ecspi_transfer_states_t
 {
@@ -50,13 +30,6 @@ typedef void (*ecspi_isr_t)(ECSPI_Type *base, ecspi_master_handle_t *ecspiHandle
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
-/*!
- * @brief Get the instance for ECSPI module.
- *
- * @param base ECSPI base address
- */
-uint32_t ECSPI_GetInstance(ECSPI_Type *base);
-
 /*!
  * @brief Sends a buffer of data bytes in non-blocking way.
  *
@@ -140,6 +113,11 @@ static ecspi_isr_t s_ecspiSlaveIsr;
 /*******************************************************************************
  * Code
  ******************************************************************************/
+/*!
+* brief Get the instance for ECSPI module.
+*
+* param base ECSPI base address
+*/
 uint32_t ECSPI_GetInstance(ECSPI_Type *base)
 {
     uint32_t instance;
@@ -230,6 +208,9 @@ static void ECSPI_ReceiveTransfer(ECSPI_Type *base, ecspi_master_handle_t *handl
 }
 static void ECSPI_GetDefaultChannelConfig(ecspi_channel_config_t *config)
 {
+    /* Initializes the configure structure to zero. */
+    memset(config, 0, sizeof(*config));
+
     config->channelMode = kECSPI_Slave;                              /*!< ECSPI peripheral operates in slave mode.*/
     config->clockInactiveState = kECSPI_ClockInactiveStateLow;       /*!< Clock line (SCLK) inactive state */
     config->dataLineInactiveState = kECSPI_DataLineInactiveStateLow; /*!< Data line (MOSI&MISO) inactive state */
@@ -239,8 +220,26 @@ static void ECSPI_GetDefaultChannelConfig(ecspi_channel_config_t *config)
     config->phase = kECSPI_ClockPhaseFirstEdge;                      /*!< clock phase */
 }
 
+/*!
+ * brief  Sets the ECSPI configuration structure to default values.
+ *
+ * The purpose of this API is to get the configuration structure initialized for use in ECSPI_MasterInit().
+ * User may use the initialized structure unchanged in ECSPI_MasterInit, or modify
+ * some fields of the structure before calling ECSPI_MasterInit. After calling this API,
+ * the master is ready to transfer.
+ * Example:
+   code
+   ecspi_master_config_t config;
+   ECSPI_MasterGetDefaultConfig(&config);
+   endcode
+ *
+ * param config pointer to config structure
+ */
 void ECSPI_MasterGetDefaultConfig(ecspi_master_config_t *config)
 {
+    /* Initializes the configure structure to zero. */
+    memset(config, 0, sizeof(*config));
+
     config->channel = kECSPI_Channel0;
     config->burstLength = 8;
     config->samplePeriodClock = kECSPI_spiClock;
@@ -256,6 +255,24 @@ void ECSPI_MasterGetDefaultConfig(ecspi_master_config_t *config)
     config->enableLoopback = false;
 }
 
+/*!
+ * brief Initializes the ECSPI with configuration.
+ *
+ * The configuration structure can be filled by user from scratch, or be set with default
+ * values by ECSPI_MasterGetDefaultConfig(). After calling this API, the slave is ready to transfer.
+ * Example
+   code
+   ecspi_master_config_t config = {
+   .baudRate_Bps = 400000,
+   ...
+   };
+   ECSPI_MasterInit(ECSPI0, &config);
+   endcode
+ *
+ * param base ECSPI base pointer
+ * param config pointer to master configuration structure
+ * param srcClock_Hz Source clock frequency.
+ */
 void ECSPI_MasterInit(ECSPI_Type *base, const ecspi_master_config_t *config, uint32_t srcClock_Hz)
 {
     assert(config && srcClock_Hz);
@@ -282,10 +299,29 @@ void ECSPI_MasterInit(ECSPI_Type *base, const ecspi_master_config_t *config, uin
     ECSPI_SetBaudRate(base, config->baudRate_Bps, srcClock_Hz);
 }
 
+/*!
+ * brief  Sets the ECSPI configuration structure to default values.
+ *
+ * The purpose of this API is to get the configuration structure initialized for use in ECSPI_SlaveInit().
+ * User may use the initialized structure unchanged in ECSPI_SlaveInit(), or modify
+ * some fields of the structure before calling ECSPI_SlaveInit(). After calling this API,
+ * the master is ready to transfer.
+ * Example:
+   code
+   ecspi_Slaveconfig_t config;
+   ECSPI_SlaveGetDefaultConfig(&config);
+   endcode
+ *
+ * param config pointer to config structure
+ */
 void ECSPI_SlaveGetDefaultConfig(ecspi_slave_config_t *config)
 {
     /* Default configuration of channel nember */
+
+    /* Initializes the configure structure to zero. */
+    memset(config, 0, sizeof(*config));
     config->channel = kECSPI_Channel0;
+
     config->burstLength = 8;
     config->txFifoThreshold = 1;
     config->rxFifoThreshold = 0;
@@ -295,6 +331,23 @@ void ECSPI_SlaveGetDefaultConfig(ecspi_slave_config_t *config)
     config->channelConfig.channelMode = kECSPI_Slave;
 }
 
+/*!
+ * brief Initializes the ECSPI with configuration.
+ *
+ * The configuration structure can be filled by user from scratch, or be set with default
+ * values by ECSPI_SlaveGetDefaultConfig(). After calling this API, the slave is ready to transfer.
+ * Example
+   code
+   ecspi_Salveconfig_t config = {
+   .baudRate_Bps = 400000,
+   ...
+   };
+   ECSPI_SlaveInit(ECSPI1, &config);
+   endcode
+ *
+ * param base ECSPI base pointer
+ * param config pointer to master configuration structure
+ */
 void ECSPI_SlaveInit(ECSPI_Type *base, const ecspi_slave_config_t *config)
 {
     assert(base && config);
@@ -315,6 +368,14 @@ void ECSPI_SlaveInit(ECSPI_Type *base, const ecspi_slave_config_t *config)
     ECSPI_SetChannelConfig(base, config->channel, &config->channelConfig);
 }
 
+/*!
+ * brief De-initializes the ECSPI.
+ *
+ * Calling this API resets the ECSPI module, gates the ECSPI clock.
+ * The ECSPI module can't work unless calling the ECSPI_MasterInit/ECSPI_SlaveInit to initialize module.
+ *
+ * param base ECSPI base pointer
+ */
 void ECSPI_Deinit(ECSPI_Type *base)
 {
     /* Disable ECSPI module before shutting down */
@@ -326,6 +387,13 @@ void ECSPI_Deinit(ECSPI_Type *base)
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 }
 
+/*!
+ * brief Sets the baud rate for ECSPI transfer. This is only used in master.
+ *
+ * param base ECSPI base pointer
+ * param baudRate_Bps baud rate needed in Hz.
+ * param srcClock_Hz ECSPI source clock frequency in Hz.
+ */
 void ECSPI_SetBaudRate(ECSPI_Type *base, uint32_t baudRate_Bps, uint32_t srcClock_Hz)
 {
     assert(base);
@@ -367,6 +435,18 @@ void ECSPI_SetBaudRate(ECSPI_Type *base, uint32_t baudRate_Bps, uint32_t srcCloc
     base->CONREG |= ECSPI_CONREG_PRE_DIVIDER(bestPreDividerValue) | ECSPI_CONREG_POST_DIVIDER(bestPostDividerValue);
 }
 
+/*!
+ * brief Set channel select configuration for transfer.
+ *
+ * The purpose of this API is to set the channel will be use to transfer.
+ * User may use this API after instance has been initialized or before transfer start.
+ * The configuration structure #_ecspi_channel_config_ can be filled by user from scratch.
+ * After calling this API, user can select this channel as transfer channel.
+ *
+ * param base ECSPI base pointer
+ * param channel Channel source.
+ * param config Configuration struct of channel
+ */
 void ECSPI_SetChannelConfig(ECSPI_Type *base, ecspi_channel_source_t channel, const ecspi_channel_config_t *config)
 {
     switch (channel)
@@ -415,6 +495,15 @@ void ECSPI_SetChannelConfig(ECSPI_Type *base, ecspi_channel_source_t channel, co
     }
 }
 
+/*!
+ * brief Sends a buffer of data bytes using a blocking method.
+ *
+ * note This function blocks via polling until all bytes have been sent.
+ *
+ * param base ECSPI base pointer
+ * param buffer The data bytes to send
+ * param size The number of data bytes to send
+ */
 void ECSPI_WriteBlocking(ECSPI_Type *base, uint32_t *buffer, size_t size)
 {
     size_t i = 0U;
@@ -474,6 +563,18 @@ static status_t ECSPI_ReadBlocking(ECSPI_Type *base, uint32_t *buffer, size_t si
     return kStatus_Success;
 }
 
+/*!
+ * brief Initializes the ECSPI master handle.
+ *
+ * This function initializes the ECSPI master handle which can be used for other ECSPI master transactional APIs.
+ * Usually,
+ * for a specified ECSPI instance, call this API once to get the initialized handle.
+ *
+ * param base ECSPI peripheral base address.
+ * param handle ECSPI handle pointer.
+ * param callback Callback function.
+ * param userData User data.
+ */
 void ECSPI_MasterTransferCreateHandle(ECSPI_Type *base,
                                       ecspi_master_handle_t *handle,
                                       ecspi_master_callback_t callback,
@@ -494,6 +595,14 @@ void ECSPI_MasterTransferCreateHandle(ECSPI_Type *base,
     EnableIRQ(s_ecspiIRQ[instance]);
 }
 
+/*!
+ * brief Transfers a block of data using a polling method.
+ *
+ * param base SPI base pointer
+ * param xfer pointer to spi_xfer_config_t structure
+ * retval kStatus_Success Successfully start a transfer.
+ * retval kStatus_InvalidArgument Input argument is invalid.
+ */
 status_t ECSPI_MasterTransferBlocking(ECSPI_Type *base, ecspi_transfer_t *xfer)
 {
     assert(base && xfer);
@@ -546,6 +655,19 @@ status_t ECSPI_MasterTransferBlocking(ECSPI_Type *base, ecspi_transfer_t *xfer)
     return kStatus_Success;
 }
 
+/*!
+ * brief Performs a non-blocking ECSPI interrupt transfer.
+ *
+ * note The API immediately returns after transfer initialization is finished.
+ * note If ECSPI transfer data frame size is 16 bits, the transfer size cannot be an odd number.
+ *
+ * param base ECSPI peripheral base address.
+ * param handle pointer to ecspi_master_handle_t structure which stores the transfer state
+ * param xfer pointer to ecspi_transfer_t structure
+ * retval kStatus_Success Successfully start a transfer.
+ * retval kStatus_InvalidArgument Input argument is invalid.
+ * retval kStatus_ECSPI_Busy ECSPI is not idle, is running another transfer.
+ */
 status_t ECSPI_MasterTransferNonBlocking(ECSPI_Type *base, ecspi_master_handle_t *handle, ecspi_transfer_t *xfer)
 {
     assert(base && handle && xfer);
@@ -603,6 +725,15 @@ status_t ECSPI_MasterTransferNonBlocking(ECSPI_Type *base, ecspi_master_handle_t
     return kStatus_Success;
 }
 
+/*!
+ * brief Gets the bytes of the ECSPI interrupt transferred.
+ *
+ * param base ECSPI peripheral base address.
+ * param handle Pointer to ECSPI transfer handle, this should be a static variable.
+ * param count Transferred bytes of ECSPI master.
+ * retval kStatus_ECSPI_Success Succeed get the transfer count.
+ * retval kStatus_NoTransferInProgress There is not a non-blocking transaction currently in progress.
+ */
 status_t ECSPI_MasterTransferGetCount(ECSPI_Type *base, ecspi_master_handle_t *handle, size_t *count)
 {
     assert(handle);
@@ -629,6 +760,12 @@ status_t ECSPI_MasterTransferGetCount(ECSPI_Type *base, ecspi_master_handle_t *h
     return status;
 }
 
+/*!
+ * brief Aborts an ECSPI transfer using interrupt.
+ *
+ * param base ECSPI peripheral base address.
+ * param handle Pointer to ECSPI transfer handle, this should be a static variable.
+ */
 void ECSPI_MasterTransferAbort(ECSPI_Type *base, ecspi_master_handle_t *handle)
 {
     assert(handle);
@@ -650,6 +787,12 @@ void ECSPI_MasterTransferAbort(ECSPI_Type *base, ecspi_master_handle_t *handle)
     handle->txRemainingBytes = 0;
 }
 
+/*!
+ * brief Interrupts the handler for the ECSPI.
+ *
+ * param base ECSPI peripheral base address.
+ * param handle pointer to ecspi_master_handle_t structure which stores the transfer state.
+ */
 void ECSPI_MasterTransferHandleIRQ(ECSPI_Type *base, ecspi_master_handle_t *handle)
 {
     assert(handle);
@@ -689,6 +832,17 @@ void ECSPI_MasterTransferHandleIRQ(ECSPI_Type *base, ecspi_master_handle_t *hand
     }
 }
 
+/*!
+ * brief Initializes the ECSPI slave handle.
+ *
+ * This function initializes the ECSPI slave handle which can be used for other ECSPI slave transactional APIs. Usually,
+ * for a specified ECSPI instance, call this API once to get the initialized handle.
+ *
+ * param base ECSPI peripheral base address.
+ * param handle ECSPI handle pointer.
+ * param callback Callback function.
+ * param userData User data.
+ */
 void ECSPI_SlaveTransferCreateHandle(ECSPI_Type *base,
                                      ecspi_slave_handle_t *handle,
                                      ecspi_slave_callback_t callback,
@@ -702,6 +856,12 @@ void ECSPI_SlaveTransferCreateHandle(ECSPI_Type *base,
     s_ecspiSlaveIsr = ECSPI_SlaveTransferHandleIRQ;
 }
 
+/*!
+ * brief Interrupts a handler for the ECSPI slave.
+ *
+ * param base ECSPI peripheral base address.
+ * param handle pointer to ecspi_slave_handle_t structure which stores the transfer state
+ */
 void ECSPI_SlaveTransferHandleIRQ(ECSPI_Type *base, ecspi_slave_handle_t *handle)
 {
     assert(handle);

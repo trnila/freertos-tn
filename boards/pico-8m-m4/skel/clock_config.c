@@ -1,34 +1,19 @@
 /*
- * The Clear BSD License
  * Copyright 2017 NXP
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted (subject to the limitations in the disclaimer below) provided
- * that the following conditions are met:
- *
- * o Redistributions of source code must retain the above copyright notice, this list
- *   of conditions and the following disclaimer.
- *
- * o Redistributions in binary form must reproduce the above copyright notice, this
- *   list of conditions and the following disclaimer in the documentation and/or
- *   other materials provided with the distribution.
- *
- * o Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from this
- *   software without specific prior written permission.
- *
- * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS LICENSE.
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
+/*
+ * TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+!!GlobalInfo
+product: Pins v4.0
+processor: MIMX8MQ6xxxJZ
+package_id: MIMX8MQ6DVAJZ
+mcu_data: ksdk2_0
+processor_version: 0.0.0
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 
 #include "fsl_common.h"
@@ -104,11 +89,10 @@ const ccm_analog_sscg_pll_config_t g_sysPll3Config = {
     .loopDivider2 = 10U,            /*!< PLL2 output  = 10 * 100 * 2 = 2000MHZ */
     .outDiv = 1U,                   /*!< PLL output = 2000 / 2 / 1 = 1000MHZ */
 };
+
 /*******************************************************************************
  * Variables
  ******************************************************************************/
-/* System clock frequency. */
-extern uint32_t SystemCoreClock;
 
 /*******************************************************************************
  * Code
@@ -119,40 +103,55 @@ void BOARD_BootClockRUN(void)
     CLOCK_InitOSC25M(&g_osc25MConfig);
     CLOCK_InitOSC27M(&g_osc27MConfig);
 
-    /* switch AXI AHB IPG root to 25M first */
-    CLOCK_SetRootMux(kCLOCK_RootAxi, kCLOCK_AxiRootmuxOsc25m);
-    CLOCK_SetRootMux(kCLOCK_RootAhb, kCLOCK_AhbRootmuxOsc25m);
-    CLOCK_SetRootMux(kCLOCK_RootM4, kCLOCK_M4RootmuxOsc25m);
-    /* switch NOC root to 25M first */
-    CLOCK_SetRootMux(kCLOCK_RootNoc, 0U);
-    
-    CLOCK_InitSysPll1(&g_sysPll1Config);     /* init SYSTEM PLL1 run at 800MHZ */
-    CLOCK_InitSysPll2(&g_sysPll2Config);     /* init SYSTEM PLL2 run at 1000MHZ */
-    CLOCK_InitSysPll3(&g_sysPll3Config);     /* init SYSTEM PLL3 run at 1000MHZ */
-    
-    CLOCK_InitAudioPll1(&g_audioPll1Config); /* init AUDIO PLL1 run at 650MHZ */
-    CLOCK_InitAudioPll2(&g_audioPll2Config); /* init AUDIO PLL2 run at 650MHZ */
-    CLOCK_InitVideoPll1(&g_videoPll1Config); /* init VIDEO PLL1 run at 650MHZ */
-    
-    CLOCK_SetRootMux(kCLOCK_RootM4, kCLOCK_M4RootmuxSysPll1Div3); /* switch cortex-m4 to SYSTEM pll1 */
-    
-    CLOCK_SetRootMux(kCLOCK_RootNoc, 3U); /* switch NOC to SYSTEM pll1 DIV3*/ 
-    
+    /* The following steps just show how to configure the PLL clock sources using the clock driver on M4 core side .
+     * Please note that the ROM has already configured the SYSTEM PLL1 to 800Mhz when power up the SOC, meanwhile A core
+     * would enable the Div output for SYSTEM PLL1 & PLL2 by U-Boot.
+     * Therefore, there is no need to configure the system PLL again on M4 side, otherwise it would have a risk to make
+     * the SOC hang.
+     */
+
+    /* switch AHB NOC root to 25M first in order to configure the SYSTEM PLL1. */
+    //    CLOCK_SetRootMux(kCLOCK_RootAhb, kCLOCK_AhbRootmuxOsc25m);
+    //    CLOCK_SetRootMux(kCLOCK_RootNoc, kCLOCK_NocRootmuxOsc25m);
+    /* switch AXI root to 25M first in order to configure the SYSTEM PLL2. */
+    //    CLOCK_SetRootMux(kCLOCK_RootAxi, kCLOCK_AxiRootmuxOsc25m);
+
+    //    CLOCK_InitSysPll1(&g_sysPll1Config); /* init SYSTEM PLL1 run at 800MHZ */
+    //    CLOCK_InitSysPll2(&g_sysPll2Config); /* init SYSTEM PLL2 run at 1000MHZ */
+    //    CLOCK_InitSysPll3(&g_sysPll3Config); /* init SYSTEM PLL3 run at 1000MHZ */
+    //
+    //    CLOCK_InitAudioPll1(&g_audioPll1Config); /* init AUDIO PLL1 run at 650MHZ */
+    //    CLOCK_InitAudioPll2(&g_audioPll2Config); /* init AUDIO PLL2 run at 650MHZ */
+    //    CLOCK_InitVideoPll1(&g_videoPll1Config); /* init VIDEO PLL1 run at 650MHZ */
+
+    CLOCK_SetRootDivider(kCLOCK_RootM4, 1U, 1U);
+    CLOCK_SetRootMux(kCLOCK_RootM4, kCLOCK_M4RootmuxSysPll1Div3); /* switch cortex-m4 to SYSTEM PLL1 DIV3 */
+    //    CLOCK_SetRootMux(kCLOCK_RootNoc, kCLOCK_NocRootmuxSysPll1);   /* change back to SYSTEM PLL1*/
+
     CLOCK_SetRootDivider(kCLOCK_RootAhb, 1U, 1U);
     CLOCK_SetRootMux(kCLOCK_RootAhb, kCLOCK_AhbRootmuxSysPll1Div6); /* switch AHB to SYSTEM PLL1 DIV6 = 133MHZ */
-    
+
     CLOCK_SetRootDivider(kCLOCK_RootAxi, 3U, 1U);
     CLOCK_SetRootMux(kCLOCK_RootAxi, kCLOCK_AxiRootmuxSysPll1); /* switch AXI to SYSTEM PLL1 = 266MHZ */
 
-    
-    CLOCK_SetRootMux(kCLOCK_RootUart3, kCLOCK_UartRootmuxSysPll1Div10); /* Set UART source to SysPLL1 Div10 80MHZ */
-    CLOCK_SetRootDivider(kCLOCK_RootUart3, 1U, 1U);                  /* Set root clock to 80MHZ/ 1= 80MHZ */   
-    
-    CLOCK_EnableClock(kCLOCK_Rdc);   /* Enable RDC clock */
-    
+    CLOCK_SetRootMux(kCLOCK_RootUart2, kCLOCK_UartRootmuxSysPll1Div10); /* Set UART source to SysPLL1 Div10 80MHZ */
+    CLOCK_SetRootDivider(kCLOCK_RootUart2, 1U, 1U);                     /* Set root clock to 80MHZ/ 1= 80MHZ */
+
+    CLOCK_EnableClock(kCLOCK_Rdc); /* Enable RDC clock */
+
+    /* The purpose to enable the following modules clock is to make sure the M4 core could work normally when A53 core
+     * enters the low power status.*/
+    // CLOCK_EnableClock(kCLOCK_Sim_m);
+    // CLOCK_EnableClock(kCLOCK_Sim_main);
+    // CLOCK_EnableClock(kCLOCK_Sim_s);
+    // CLOCK_EnableClock(kCLOCK_Sim_wakeup);
+    // CLOCK_EnableClock(kCLOCK_Debug);
+    // CLOCK_EnableClock(kCLOCK_Dram);
+    // CLOCK_EnableClock(kCLOCK_Sec_Debug);
+
     /* Disable unused PLL */
     CLOCK_DeinitSysPll3();
-    CLOCK_DeinitVedioPll1();
+    CLOCK_DeinitVideoPll1();
     CLOCK_DeinitAudioPll1();
     CLOCK_DeinitAudioPll2();
     /* Update core clock */

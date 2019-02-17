@@ -1,35 +1,9 @@
 /*
- * The Clear BSD License
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
  * Copyright 2016-2017 NXP
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted (subject to the limitations in the disclaimer below) provided
- * that the following conditions are met:
- *
- * o Redistributions of source code must retain the above copyright notice, this list
- *   of conditions and the following disclaimer.
- *
- * o Redistributions in binary form must reproduce the above copyright notice, this
- *   list of conditions and the following disclaimer in the documentation and/or
- *   other materials provided with the distribution.
- *
- * o Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from this
- *   software without specific prior written permission.
- *
- * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS LICENSE.
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "fsl_uart.h"
@@ -37,6 +11,11 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
+
+/* Component ID definition, used by tools. */
+#ifndef FSL_COMPONENT_ID
+#define FSL_COMPONENT_ID "platform.drivers.iuart"
+#endif
 
 /* UART transfer state. */
 enum _uart_tansfer_states
@@ -55,15 +34,6 @@ typedef void (*uart_isr_t)(UART_Type *base, uart_handle_t *handle);
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
-
-/*!
- * @brief Get the UART instance from peripheral base address.
- *
- * @param base UART peripheral base address.
- * @return UART instance.
- */
-uint32_t UART_GetInstance(UART_Type *base);
-
 /*!
  * @brief Check whether the RX ring buffer is full.
  *
@@ -104,42 +74,6 @@ static void UART_WriteNonBlocking(UART_Type *base, const uint8_t *data, size_t l
 /*******************************************************************************
  * Variables
  ******************************************************************************/
-/* ARRAY of UART handle */
-#if (defined(UART8))
-#define UART_HANDLE_ARRAY_SIZE 8
-#else /* UART8 */
-#if (defined(UART7))
-#define UART_HANDLE_ARRAY_SIZE 7
-#else /* UART7 */
-#if (defined(UART6))
-#define UART_HANDLE_ARRAY_SIZE 6
-#else /* UART6 */
-#if (defined(UART5))
-#define UART_HANDLE_ARRAY_SIZE 5
-#else /* UART5 */
-#if (defined(UART4))
-#define UART_HANDLE_ARRAY_SIZE 4
-#else /* UART4 */
-#if (defined(UART3))
-#define UART_HANDLE_ARRAY_SIZE 3
-#else /* UART3 */
-#if (defined(UART2))
-#define UART_HANDLE_ARRAY_SIZE 2
-#else /* UART2 */
-#if (defined(UART1))
-#define UART_HANDLE_ARRAY_SIZE 1
-#else /* UART1 */
-#error No UART instance.
-#endif /* UART 1 */
-#endif /* UART 2 */
-#endif /* UART 3 */
-#endif /* UART 4 */
-#endif /* UART 5 */
-#endif /* UART 6 */
-#endif /* UART 7 */
-#endif /* UART 8 */
-static uart_handle_t *s_uartHandle[UART_HANDLE_ARRAY_SIZE];
-
 /* Array of UART peripheral base address. */
 static UART_Type *const s_uartBases[] = UART_BASE_PTRS;
 
@@ -154,9 +88,17 @@ static const clock_ip_name_t s_uartClock[] = UART_CLOCKS;
 /* UART ISR for transactional APIs. */
 static uart_isr_t s_uartIsr;
 
+static uart_handle_t *s_uartHandle[ARRAY_SIZE(s_uartBases)];
+
 /*******************************************************************************
  * Code
  ******************************************************************************/
+/*!
+ * brief Get the UART instance from peripheral base address.
+ *
+ * param base UART peripheral base address.
+ * return UART instance.
+ */
 uint32_t UART_GetInstance(UART_Type *base)
 {
     uint32_t instance;
@@ -175,6 +117,12 @@ uint32_t UART_GetInstance(UART_Type *base)
     return instance;
 }
 
+/*!
+ * brief Get the length of received data in RX ring buffer.
+ *
+ * param handle UART handle pointer.
+ * return Length of received data in RX ring buffer.
+ */
 size_t UART_TransferGetRxRingBufferLength(uart_handle_t *handle)
 {
     assert(handle);
@@ -211,6 +159,31 @@ static bool UART_TransferIsRxRingBufferFull(uart_handle_t *handle)
     return full;
 }
 
+/*!
+ * brief Initializes an UART instance with the user configuration structure and the peripheral clock.
+ *
+ * This function configures the UART module with user-defined settings. Call the UART_GetDefaultConfig() function
+ * to configure the configuration structure and get the default configuration.
+ * The example below shows how to use this API to configure the UART.
+ * code
+ *  uart_config_t uartConfig;
+ *  uartConfig.baudRate_Bps = 115200U;
+ *  uartConfig.parityMode = kUART_ParityDisabled;
+ *  uartConfig.dataBitsCount = kUART_EightDataBits;
+ *  uartConfig.stopBitCount = kUART_OneStopBit;
+ *  uartConfig.txFifoWatermark = 2;
+ *  uartConfig.rxFifoWatermark = 1;
+ *  uartConfig.enableAutoBaudrate = false;
+ *  uartConfig.enableTx = true;
+ *  uartConfig.enableRx = true;
+ *  UART_Init(UART1, &uartConfig, 24000000U);
+ * endcode
+ *
+ * param base UART peripheral base address.
+ * param config Pointer to a user-defined configuration structure.
+ * param srcClock_Hz UART clock source frequency in HZ.
+ * retval kStatus_Success UART initialize succeed
+ */
 status_t UART_Init(UART_Type *base, const uart_config_t *config, uint32_t srcClock_Hz)
 {
     /* Check argument */
@@ -283,6 +256,13 @@ status_t UART_Init(UART_Type *base, const uart_config_t *config, uint32_t srcClo
     return kStatus_Success;
 }
 
+/*!
+ * brief Deinitializes a UART instance.
+ *
+ * This function waits for transmit to complete, disables TX and RX, and disables the UART clock.
+ *
+ * param base UART peripheral base address.
+ */
 void UART_Deinit(UART_Type *base)
 {
     /* Wait transmit FIFO buffer and shift register empty */
@@ -298,9 +278,29 @@ void UART_Deinit(UART_Type *base)
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 }
 
+/*!l
+ * brief Gets the default configuration structure.
+ *
+ * This function initializes the UART configuration structure to a default value. The default
+ * values are:
+ *   uartConfig->baudRate_Bps = 115200U;
+ *   uartConfig->parityMode = kUART_ParityDisabled;
+ *   uartConfig->dataBitsCount = kUART_EightDataBits;
+ *   uartConfig->stopBitCount = kUART_OneStopBit;
+ *   uartConfig->txFifoWatermark = 2;
+ *   uartConfig->rxFifoWatermark = 1;
+ *   uartConfig->enableAutoBaudrate = flase;
+ *   uartConfig->enableTx = false;
+ *   uartConfig->enableRx = false;
+ *
+ * param config Pointer to a configuration structure.
+ */
 void UART_GetDefaultConfig(uart_config_t *config)
 {
     assert(config);
+
+    /* Initializes the configure structure to zero. */
+    memset(config, 0, sizeof(*config));
 
     config->baudRate_Bps = 115200U;
     config->parityMode = kUART_ParityDisabled;
@@ -321,6 +321,21 @@ void UART_GetDefaultConfig(uart_config_t *config)
  * both of numerator and denominator will be divided by the same value, which
  * will ensure numerator and denominator range from 0~maximum value(0xFFFF).
  * Then calculate UFCR and UBIR value from numerator, and get UBMR value from denominator.
+ */
+/*!
+ * brief Sets the UART instance baud rate.
+ *
+ * This function configures the UART module baud rate. This function is used to update
+ * the UART module baud rate after the UART module is initialized by the UART_Init.
+ * code
+ *  UART_SetBaudRate(UART1, 115200U, 20000000U);
+ * endcode
+ *
+ * param base UART peripheral base address.
+ * param baudRate_Bps UART baudrate to be set.
+ * param srcClock_Hz UART clock source freqency in Hz.
+ * retval kStatus_UART_BaudrateNotSupport Baudrate is not support in the current clock source.
+ * retval kStatus_Success Set baudrate succeeded.
  */
 status_t UART_SetBaudRate(UART_Type *base, uint32_t baudRate_Bps, uint32_t srcClock_Hz)
 {
@@ -430,6 +445,19 @@ status_t UART_SetBaudRate(UART_Type *base, uint32_t baudRate_Bps, uint32_t srcCl
     }
 }
 
+/*!
+ * brief Enables UART interrupts according to the provided mask.
+ *
+ * This function enables the UART interrupts according to the provided mask. The mask
+ * is a logical OR of enumeration members. See ref _uart_interrupt_enable.
+ * For example, to enable TX empty interrupt and RX data ready interrupt, do the following.
+ * code
+ *     UART_EnableInterrupts(UART1,kUART_TxEmptyEnable | kUART_RxDataReadyEnable);
+ * endcode
+ *
+ * param base UART peripheral base address.
+ * param mask The interrupts to enable. Logical OR of ref _uart_interrupt_enable.
+ */
 void UART_EnableInterrupts(UART_Type *base, uint32_t mask)
 {
     assert(0x7F3FF73FU & mask);
@@ -474,6 +502,19 @@ void UART_EnableInterrupts(UART_Type *base, uint32_t mask)
     }
 }
 
+/*!
+ * brief Disables the UART interrupts according to the provided mask.
+ *
+ * This function disables the UART interrupts according to the provided mask. The mask
+ * is a logical OR of enumeration members. See ref _uart_interrupt_enable.
+ * For example, to disable TX empty interrupt and RX data ready interrupt do the following.
+ * code
+ *     UART_EnableInterrupts(UART1,kUART_TxEmptyEnable | kUART_RxDataReadyEnable);
+ * endcode
+ *
+ * param base UART peripheral base address.
+ * param mask The interrupts to disable. Logical OR of ref _uart_interrupt_enable.
+ */
 void UART_DisableInterrupts(UART_Type *base, uint32_t mask)
 {
     assert(0x7F3FF73FU & mask);
@@ -518,6 +559,26 @@ void UART_DisableInterrupts(UART_Type *base, uint32_t mask)
     }
 }
 
+/*!
+ * brief Gets enabled UART interrupts.
+ *
+ * This function gets the enabled UART interrupts. The enabled interrupts are returned
+ * as the logical OR value of the enumerators ref _uart_interrupt_enable. To check
+ * a specific interrupt enable status, compare the return value with enumerators
+ * in ref _uart_interrupt_enable.
+ * For example, to check whether the TX empty interrupt is enabled:
+ * code
+ *     uint32_t enabledInterrupts = UART_GetEnabledInterrupts(UART1);
+ *
+ *     if (kUART_TxEmptyEnable & enabledInterrupts)
+ *     {
+ *         ...
+ *     }
+ * endcode
+ *
+ * param base UART peripheral base address.
+ * return UART interrupt flags which are logical OR of the enumerators in ref _uart_interrupt_enable.
+ */
 uint32_t UART_GetEnabledInterrupts(UART_Type *base)
 {
     assert(base);
@@ -556,6 +617,15 @@ uint32_t UART_GetEnabledInterrupts(UART_Type *base)
     return temp;
 }
 
+/*!
+ * brief This function is used to get the current status of specific
+ *        UART status flag(including interrupt flag). The available
+ *        status flag can be select from ref uart_status_flag_t enumeration.
+ *
+ * param base UART base pointer.
+ * param flag Status flag to check.
+ * retval current state of corresponding status flag.
+ */
 bool UART_GetStatusFlag(UART_Type *base, uint32_t flag)
 {
     volatile uint32_t *uart_reg;
@@ -564,6 +634,14 @@ bool UART_GetStatusFlag(UART_Type *base, uint32_t flag)
     return (bool)(((*uart_reg) >> (flag & 0x1FU)) & 0x1U);
 }
 
+/*!
+ * brief This function is used to clear the current status
+ *        of specific UART status flag. The available status
+ *        flag can be select from ref uart_status_flag_t enumeration.
+ *
+ * param base UART base pointer.
+ * param flag Status flag to clear.
+ */
 void UART_ClearStatusFlag(UART_Type *base, uint32_t flag)
 {
     volatile uint32_t *uart_reg = 0;
@@ -592,6 +670,20 @@ void UART_EnableDMA(UART_Type *base, uint32_t dmaSource, bool enable)
     }
 }
 
+/*!
+ * brief Writes to the TX register using a blocking method.
+ *
+ * This function polls the TX register, waits for the TX register to be empty or for the TX FIFO
+ * to have room and writes data to the TX buffer.
+ *
+ * note This function does not check whether all data is sent out to the bus.
+ * Before disabling the TX, check kUART_TransmissionCompleteFlag to ensure that the TX is
+ * finished.
+ *
+ * param base UART peripheral base address.
+ * param data Start address of the data to write.
+ * param length Size of the data to write.
+ */
 void UART_WriteBlocking(UART_Type *base, const uint8_t *data, size_t length)
 {
     assert(data);
@@ -609,6 +701,21 @@ void UART_WriteBlocking(UART_Type *base, const uint8_t *data, size_t length)
     }
 }
 
+/*!
+ * brief Read RX data register using a blocking method.
+ *
+ * This function polls the RX register, waits for the RX register to be full or for RX FIFO to
+ * have data, and reads data from the TX register.
+ *
+ * param base UART peripheral base address.
+ * param data Start address of the buffer to store the received data.
+ * param length Size of the buffer.
+ * retval kStatus_UART_RxHardwareOverrun Receiver overrun occurred while receiving data.
+ * retval kStatus_UART_NoiseError A noise error occurred while receiving data.
+ * retval kStatus_UART_FramingError A framing error occurred while receiving data.
+ * retval kStatus_UART_ParityError A parity error occurred while receiving data.
+ * retval kStatus_Success Successfully received all data.
+ */
 status_t UART_ReadBlocking(UART_Type *base, uint8_t *data, size_t length)
 {
     assert(data);
@@ -676,6 +783,18 @@ static void UART_ReadNonBlocking(UART_Type *base, uint8_t *data, size_t length)
     }
 }
 
+/*!
+ * brief Initializes the UART handle.
+ *
+ * This function initializes the UART handle which can be used for other UART
+ * transactional APIs. Usually, for a specified UART instance,
+ * call this API once to get the initialized handle.
+ *
+ * param base UART peripheral base address.
+ * param handle UART handle pointer.
+ * param callback The callback function.
+ * param userData The parameter of the callback function.
+ */
 void UART_TransferCreateHandle(UART_Type *base,
                                uart_handle_t *handle,
                                uart_transfer_callback_t callback,
@@ -700,7 +819,7 @@ void UART_TransferCreateHandle(UART_Type *base,
     instance = UART_GetInstance(base);
 
     /* Save the handle in global variables to support the double weak mechanism. */
-    s_uartHandle[instance - 1] = handle;
+    s_uartHandle[instance] = handle;
 
     s_uartIsr = UART_TransferHandleIRQ;
 
@@ -708,6 +827,23 @@ void UART_TransferCreateHandle(UART_Type *base,
     EnableIRQ(s_uartIRQ[instance]);
 }
 
+/*!
+ * brief Sets up the RX ring buffer.
+ *
+ * This function sets up the RX ring buffer to a specific UART handle.
+ *
+ * When the RX ring buffer is used, data received are stored into the ring buffer even when the
+ * user doesn't call the UART_TransferReceiveNonBlocking() API. If data is already received
+ * in the ring buffer, the user can get the received data from the ring buffer directly.
+ *
+ * note When using the RX ring buffer, one byte is reserved for internal use. In other
+ * words, if p ringBufferSize is 32, only 31 bytes are used for saving data.
+ *
+ * param base UART peripheral base address.
+ * param handle UART handle pointer.
+ * param ringBuffer Start address of the ring buffer for background receiving. Pass NULL to disable the ring buffer.
+ * param ringBufferSize Size of the ring buffer.
+ */
 void UART_TransferStartRingBuffer(UART_Type *base, uart_handle_t *handle, uint8_t *ringBuffer, size_t ringBufferSize)
 {
     assert(handle);
@@ -724,6 +860,14 @@ void UART_TransferStartRingBuffer(UART_Type *base, uart_handle_t *handle, uint8_
                                     kUART_ParityErrorEnable | kUART_FrameErrorEnable);
 }
 
+/*!
+ * brief Aborts the background transfer and uninstalls the ring buffer.
+ *
+ * This function aborts the background transfer and uninstalls the ring buffer.
+ *
+ * param base UART peripheral base address.
+ * param handle UART handle pointer.
+ */
 void UART_TransferStopRingBuffer(UART_Type *base, uart_handle_t *handle)
 {
     assert(handle);
@@ -740,6 +884,25 @@ void UART_TransferStopRingBuffer(UART_Type *base, uart_handle_t *handle)
     handle->rxRingBufferTail = 0U;
 }
 
+/*!
+ * brief Transmits a buffer of data using the interrupt method.
+ *
+ * This function sends data using an interrupt method. This is a non-blocking function, which
+ * returns directly without waiting for all data to be written to the TX register. When
+ * all data is written to the TX register in the ISR, the UART driver calls the callback
+ * function and passes the ref kStatus_UART_TxIdle as status parameter.
+ *
+ * note The kStatus_UART_TxIdle is passed to the upper layer when all data is written
+ * to the TX register. However, it does not ensure that all data is sent out. Before disabling the TX,
+ * check the kUART_TransmissionCompleteFlag to ensure that the TX is finished.
+ *
+ * param base UART peripheral base address.
+ * param handle UART handle pointer.
+ * param xfer UART transfer structure. See  #uart_transfer_t.
+ * retval kStatus_Success Successfully start the data transmission.
+ * retval kStatus_UART_TxBusy Previous transmission still not finished; data not all written to TX register yet.
+ * retval kStatus_InvalidArgument Invalid argument.
+ */
 status_t UART_TransferSendNonBlocking(UART_Type *base, uart_handle_t *handle, uart_transfer_t *xfer)
 {
     assert(handle);
@@ -769,6 +932,15 @@ status_t UART_TransferSendNonBlocking(UART_Type *base, uart_handle_t *handle, ua
     return status;
 }
 
+/*!
+ * brief Aborts the interrupt-driven data transmit.
+ *
+ * This function aborts the interrupt-driven data sending. The user can get the remainBytes to find out
+ * how many bytes are not sent out.
+ *
+ * param base UART peripheral base address.
+ * param handle UART handle pointer.
+ */
 void UART_TransferAbortSend(UART_Type *base, uart_handle_t *handle)
 {
     assert(handle);
@@ -779,6 +951,19 @@ void UART_TransferAbortSend(UART_Type *base, uart_handle_t *handle)
     handle->txState = kUART_TxIdle;
 }
 
+/*!
+ * brief Gets the number of bytes written to the UART TX register.
+ *
+ * This function gets the number of bytes written to the UART TX
+ * register by using the interrupt method.
+ *
+ * param base UART peripheral base address.
+ * param handle UART handle pointer.
+ * param count Send bytes count.
+ * retval kStatus_NoTransferInProgress No send in progress.
+ * retval kStatus_InvalidArgument The parameter is invalid.
+ * retval kStatus_Success Get successfully through the parameter \p count;
+ */
 status_t UART_TransferGetSendCount(UART_Type *base, uart_handle_t *handle, uint32_t *count)
 {
     assert(handle);
@@ -794,6 +979,32 @@ status_t UART_TransferGetSendCount(UART_Type *base, uart_handle_t *handle, uint3
     return kStatus_Success;
 }
 
+/*!
+ * brief Receives a buffer of data using an interrupt method.
+ *
+ * This function receives data using an interrupt method. This is a non-blocking function, which
+ *  returns without waiting for all data to be received.
+ * If the RX ring buffer is used and not empty, the data in the ring buffer is copied and
+ * the parameter p receivedBytes shows how many bytes are copied from the ring buffer.
+ * After copying, if the data in the ring buffer is not enough to read, the receive
+ * request is saved by the UART driver. When the new data arrives, the receive request
+ * is serviced first. When all data is received, the UART driver notifies the upper layer
+ * through a callback function and passes the status parameter ref kStatus_UART_RxIdle.
+ * For example, the upper layer needs 10 bytes but there are only 5 bytes in the ring buffer.
+ * The 5 bytes are copied to the xfer->data and this function returns with the
+ * parameter p receivedBytes set to 5. For the left 5 bytes, newly arrived data is
+ * saved from the xfer->data[5]. When 5 bytes are received, the UART driver notifies the upper layer.
+ * If the RX ring buffer is not enabled, this function enables the RX and RX interrupt
+ * to receive data to the xfer->data. When all data is received, the upper layer is notified.
+ *
+ * param base UART peripheral base address.
+ * param handle UART handle pointer.
+ * param xfer UART transfer structure, see #uart_transfer_t.
+ * param receivedBytes Bytes received from the ring buffer directly.
+ * retval kStatus_Success Successfully queue the transfer into transmit queue.
+ * retval kStatus_UART_RxBusy Previous receive request is not finished.
+ * retval kStatus_InvalidArgument Invalid argument.
+ */
 status_t UART_TransferReceiveNonBlocking(UART_Type *base,
                                          uart_handle_t *handle,
                                          uart_transfer_t *xfer,
@@ -911,6 +1122,15 @@ status_t UART_TransferReceiveNonBlocking(UART_Type *base,
     return status;
 }
 
+/*!
+ * brief Aborts the interrupt-driven data receiving.
+ *
+ * This function aborts the interrupt-driven data receiving. The user can get the remainBytes to know
+ * how many bytes are not received yet.
+ *
+ * param base UART peripheral base address.
+ * param handle UART handle pointer.
+ */
 void UART_TransferAbortReceive(UART_Type *base, uart_handle_t *handle)
 {
     assert(handle);
@@ -927,6 +1147,18 @@ void UART_TransferAbortReceive(UART_Type *base, uart_handle_t *handle)
     handle->rxState = kUART_RxIdle;
 }
 
+/*!
+ * brief Gets the number of bytes that have been received.
+ *
+ * This function gets the number of bytes that have been received.
+ *
+ * param base UART peripheral base address.
+ * param handle UART handle pointer.
+ * param count Receive bytes count.
+ * retval kStatus_NoTransferInProgress No receive in progress.
+ * retval kStatus_InvalidArgument Parameter is invalid.
+ * retval kStatus_Success Get successfully through the parameter \p count;
+ */
 status_t UART_TransferGetReceiveCount(UART_Type *base, uart_handle_t *handle, uint32_t *count)
 {
     assert(handle);
@@ -947,6 +1179,14 @@ status_t UART_TransferGetReceiveCount(UART_Type *base, uart_handle_t *handle, ui
     return kStatus_Success;
 }
 
+/*!
+ * brief UART IRQ handle function.
+ *
+ * This function handles the UART transmit and receive IRQ request.
+ *
+ * param base UART peripheral base address.
+ * param handle UART handle pointer.
+ */
 void UART_TransferHandleIRQ(UART_Type *base, uart_handle_t *handle)
 {
     assert(handle);
@@ -1228,7 +1468,7 @@ void UART_TransferHandleIRQ(UART_Type *base, uart_handle_t *handle)
 #if defined(UART1)
 void UART1_DriverIRQHandler(void)
 {
-    s_uartIsr(UART1, s_uartHandle[0]);
+    s_uartIsr(UART1, s_uartHandle[1]);
 /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
   exception return operation might vector to incorrect interrupt */
 #if defined __CORTEX_M && (__CORTEX_M == 4U)
@@ -1240,7 +1480,7 @@ void UART1_DriverIRQHandler(void)
 #if defined(UART2)
 void UART2_DriverIRQHandler(void)
 {
-    s_uartIsr(UART2, s_uartHandle[1]);
+    s_uartIsr(UART2, s_uartHandle[2]);
 /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
   exception return operation might vector to incorrect interrupt */
 #if defined __CORTEX_M && (__CORTEX_M == 4U)
@@ -1252,7 +1492,7 @@ void UART2_DriverIRQHandler(void)
 #if defined(UART3)
 void UART3_DriverIRQHandler(void)
 {
-    s_uartIsr(UART3, s_uartHandle[2]);
+    s_uartIsr(UART3, s_uartHandle[3]);
 /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
   exception return operation might vector to incorrect interrupt */
 #if defined __CORTEX_M && (__CORTEX_M == 4U)
@@ -1264,7 +1504,7 @@ void UART3_DriverIRQHandler(void)
 #if defined(UART4)
 void UART4_DriverIRQHandler(void)
 {
-    s_uartIsr(UART4, s_uartHandle[3]);
+    s_uartIsr(UART4, s_uartHandle[4]);
 /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
   exception return operation might vector to incorrect interrupt */
 #if defined __CORTEX_M && (__CORTEX_M == 4U)
@@ -1276,7 +1516,7 @@ void UART4_DriverIRQHandler(void)
 #if defined(UART5)
 void UART5_DriverIRQHandler(void)
 {
-    s_uartIsr(UART5, s_uartHandle[4]);
+    s_uartIsr(UART5, s_uartHandle[5]);
 /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
   exception return operation might vector to incorrect interrupt */
 #if defined __CORTEX_M && (__CORTEX_M == 4U)
@@ -1288,7 +1528,7 @@ void UART5_DriverIRQHandler(void)
 #if defined(UART6)
 void UART6_DriverIRQHandler(void)
 {
-    s_uartIsr(UART6, s_uartHandle[5]);
+    s_uartIsr(UART6, s_uartHandle[6]);
 /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
   exception return operation might vector to incorrect interrupt */
 #if defined __CORTEX_M && (__CORTEX_M == 4U)
@@ -1300,7 +1540,7 @@ void UART6_DriverIRQHandler(void)
 #if defined(UART7)
 void UART7_DriverIRQHandler(void)
 {
-    s_uartIsr(UART7, s_uartHandle[6]);
+    s_uartIsr(UART7, s_uartHandle[7]);
 /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
   exception return operation might vector to incorrect interrupt */
 #if defined __CORTEX_M && (__CORTEX_M == 4U)
@@ -1312,7 +1552,7 @@ void UART7_DriverIRQHandler(void)
 #if defined(UART8)
 void UART8_DriverIRQHandler(void)
 {
-    s_uartIsr(UART8, s_uartHandle[7]);
+    s_uartIsr(UART8, s_uartHandle[8]);
 /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
   exception return operation might vector to incorrect interrupt */
 #if defined __CORTEX_M && (__CORTEX_M == 4U)

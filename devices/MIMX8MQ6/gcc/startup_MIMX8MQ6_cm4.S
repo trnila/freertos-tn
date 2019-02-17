@@ -1,43 +1,16 @@
-/* ---------------------------------------------------------------------------------------*/
-/*  @file:    startup_MIMX8MQ6_cm4.s                                                      */
-/*  @purpose: CMSIS Cortex-M4 Core Device Startup File                                    */
-/*            MIMX8MQ6_cm4                                                                */
-/*  @version: 3.0                                                                         */
-/*  @date:    2017-7-19                                                                   */
-/*  @build:   b170802                                                                     */
-/* ---------------------------------------------------------------------------------------*/
-/*                                                                                        */
-/* The Clear BSD License                                                                  */
-/* Copyright 1997-2016 Freescale Semiconductor, Inc.                                      */
-/* Copyright 2016-2017 NXP                                                                */
-/** All rights reserved.                                                                  */
-/* Redistribution and use in source and binary forms, with or without modification,       */
-/* are permitted(subject to the limitations in the disclaimer below) provided             */
-/* that the following conditions are met:                                                 */
-/*                                                                                        */
-/* 1. Redistributions of source code must retain the above copyright notice, this list    */
-/*   of conditions and the following disclaimer.                                          */
-/*                                                                                        */
-/* 2. Redistributions in binary form must reproduce the above copyright notice, this      */
-/*   list of conditions and the following disclaimer in the documentation and/or          */
-/*   other materials provided with the distribution.                                      */
-/*                                                                                        */
-/* 3. Neither the name of the copyright holder nor the names of its                       */
-/*   contributors may be used to endorse or promote products derived from this            */
-/*   software without specific prior written permission.                                  */
-/*                                                                                        */
-/* NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S' PATENT RIGHTS ARE GRANTED BY THIS       */
-/* LICENSE.                                                                               */
-/* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND        */
-/* ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED          */
-/* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE                 */
-/* DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR       */
-/* ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES         */
-/* (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;           */
-/* LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON         */
-/* ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT                */
-/* (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS          */
-/* SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                           */
+/* ------------------------------------------------------------------------- */
+/*  @file:    startup_MIMX8MQ6_cm4.s                                         */
+/*  @purpose: CMSIS Cortex-M4 Core Device Startup File                       */
+/*            MIMX8MQ6_cm4                                                   */
+/*  @version: 4.0                                                            */
+/*  @date:    2018-1-26                                                      */
+/*  @build:   b180801                                                        */
+/* ------------------------------------------------------------------------- */
+/*                                                                           */
+/* Copyright 1997-2016 Freescale Semiconductor, Inc.                         */
+/* Copyright 2016-2018 NXP                                                   */
+/*                                                                           */
+/* SPDX-License-Identifier: BSD-3-Clause              */
 /*****************************************************************************/
 /* Version: GCC for ARM Embedded Processors                                  */
 /*****************************************************************************/
@@ -74,32 +47,32 @@ __isr_vector:
     .long   LCDIF_IRQHandler                                /* LCDIF Sync Interrupt*/
     .long   SPDIF1_IRQHandler                               /* SPDIF1 Interrupt*/
     .long   H264_IRQHandler                                 /* h264 Decoder Interrupt*/
-    .long   VPU_IRQHandler                                  /* VPU DMA Interrupt*/
+    .long   VPUDMA_IRQHandler                               /* VPU DMA Interrupt*/
     .long   QOS_IRQHandler                                  /* QOS interrupt*/
     .long   WDOG3_IRQHandler                                /* Watchdog Timer reset*/
-    .long   HS0_IRQHandler                                  /* HS Interrupt Request 0*/
-    .long   APBHDMA_IRQHandler                              /* GPMI operation channel 0 description complete interrupt*/
+    .long   HS_CP1_IRQHandler                               /* HS Interrupt Request*/
+    .long   APBHDMA_IRQHandler                              /* GPMI operation channel 0-3 description complete interrupt*/
     .long   SPDIF2_IRQHandler                               /* SPDIF2 Interrupt*/
     .long   BCH_IRQHandler                                  /* BCH operation complete interrupt*/
     .long   GPMI_IRQHandler                                 /* GPMI operation TIMEOUT ERROR interrupt*/
-    .long   Reserved32_IRQHandler                           /* reserved interrupt*/
-    .long   Reserved33_IRQHandler                           /* reserved interrupt*/
-    .long   Reserved34_IRQHandler                           /* reserved interrupt*/
+    .long   HDMI_IRQ0_IRQHandler                            /* HDMI Interrupt 0*/
+    .long   HDMI_IRQ1_IRQHandler                            /* HDMI Interrupt 1*/
+    .long   HDMI_IRQ2_IRQHandler                            /* HDMI Interrupt 2*/
     .long   SNVS_Consolidated_IRQHandler                    /* SRTC Consolidated Interrupt. Non TZ.*/
     .long   SNVS_Security_IRQHandler                        /* SRTC Security Interrupt. TZ.*/
     .long   CSU_IRQHandler                                  /* CSU Interrupt Request. Indicates to the processor that one or more alarm inputs were asserted.*/
     .long   USDHC1_IRQHandler                               /* uSDHC1 Enhanced SDHC Interrupt Request*/
     .long   USDHC2_IRQHandler                               /* uSDHC2 Enhanced SDHC Interrupt Request*/
-    .long   DDC_IRQHandler                                  /* Dollby Display Interrupt Request*/
-    .long   HDMI_IRQHandler                                 /* HDMI2.0 TX interrupt*/
+    .long   DDC_IRQHandler                                  /* DC8000 Display Controller IRQ*/
+    .long   DTRC_IRQHandler                                 /* DTRC interrupt*/
     .long   UART1_IRQHandler                                /* UART-1 ORed interrupt*/
     .long   UART2_IRQHandler                                /* UART-2 ORed interrupt*/
     .long   UART3_IRQHandler                                /* UART-3 ORed interrupt*/
     .long   UART4_IRQHandler                                /* UART-4 ORed interrupt*/
     .long   VP9_IRQHandler                                  /* VP9 Decoder interrupt*/
-    .long   ECSPI1_IRQHandler                               /* eCSPI1 interrupt request line to the core.*/
-    .long   ECSPI2_IRQHandler                               /* eCSPI2 interrupt request line to the core.*/
-    .long   ECSPI3_IRQHandler                               /* eCSPI3 interrupt request line to the core.*/
+    .long   ECSPI1_IRQHandler                               /* ECSPI1 interrupt request line to the core.*/
+    .long   ECSPI2_IRQHandler                               /* ECSPI2 interrupt request line to the core.*/
+    .long   ECSPI3_IRQHandler                               /* ECSPI3 interrupt request line to the core.*/
     .long   MIPI_DSI_IRQHandler                             /* DSI Interrupt*/
     .long   I2C1_IRQHandler                                 /* I2C-1 Interrupt*/
     .long   I2C2_IRQHandler                                 /* I2C-2 Interrupt*/
@@ -115,7 +88,7 @@ __isr_vector:
     .long   GPT6_IRQHandler                                 /* OR of GPT Rollover interrupt line, Input Capture 1 and 2 lines, Output Compare 1, 2, and 3 Interrupt lines*/
     .long   SCTR_IRQ0_IRQHandler                            /* ISO7816IP Interrupt 0*/
     .long   SCTR_IRQ1_IRQHandler                            /* ISO7816IP Interrupt 1*/
-    .long   TEMPMON_LOW_IRQHandler                          /* TempSensor (Temperature low alarm).*/
+    .long   TEMPMON_IRQHandler                              /* TempSensor (Temperature alarm).*/
     .long   I2S3_IRQHandler                                 /* SAI3 Receive / Transmit Interrupt*/
     .long   GPT5_IRQHandler                                 /* OR of GPT Rollover interrupt line, Input Capture 1 and 2 lines, Output Compare 1, 2, and 3 Interrupt lines*/
     .long   GPT4_IRQHandler                                 /* OR of GPT Rollover interrupt line, Input Capture 1 and 2 lines, Output Compare 1, 2, and 3 Interrupt lines*/
@@ -151,12 +124,12 @@ __isr_vector:
     .long   PWM2_IRQHandler                                 /* Cumulative interrupt line. OR of Rollover Interrupt line, Compare Interrupt line and FIFO Waterlevel crossing interrupt line.*/
     .long   PWM3_IRQHandler                                 /* Cumulative interrupt line. OR of Rollover Interrupt line, Compare Interrupt line and FIFO Waterlevel crossing interrupt line.*/
     .long   PWM4_IRQHandler                                 /* Cumulative interrupt line. OR of Rollover Interrupt line, Compare Interrupt line and FIFO Waterlevel crossing interrupt line.*/
-    .long   CCM1_IRQHandler                                 /* CCM, Interrupt Request 1*/
-    .long   CCM2_IRQHandler                                 /* CCM, Interrupt Request 2*/
+    .long   CCM_IRQ1_IRQHandler                             /* CCM, Interrupt Request 1*/
+    .long   CCM_IRQ2_IRQHandler                             /* CCM, Interrupt Request 2*/
     .long   GPC_IRQHandler                                  /* GPC Interrupt Request 1*/
     .long   MU_A53_IRQHandler                               /* Interrupt to A53*/
     .long   SRC_IRQHandler                                  /* SRC interrupt request*/
-    .long   I2S5_IRQHandler                                 /* SAI5 Receive / Transmit Interrupt*/
+    .long   I2S56_IRQHandler                                /* SAI5/6 Receive / Transmit Interrupt*/
     .long   RTIC_IRQHandler                                 /* RTIC Interrupt*/
     .long   CPU_PerformanceUnit_IRQHandler                  /* Performance Unit Interrupts from Cheetah (interrnally: PMUIRQ[n]*/
     .long   CPU_CTI_Trigger_IRQHandler                      /* CTI trigger outputs (internal: nCTIIRQ[n]*/
@@ -164,30 +137,30 @@ __isr_vector:
     .long   I2S1_IRQHandler                                 /* SAI1 Receive / Transmit Interrupt*/
     .long   I2S2_IRQHandler                                 /* SAI2 Receive / Transmit Interrupt*/
     .long   MU_M4_IRQHandler                                /* Interrupt to M4*/
-    .long   Reserved114_IRQHandler                          /* Reserved*/
-    .long   Reserved115_IRQHandler                          /* Reserved*/
+    .long   DDR_PerformanceMonitor_IRQHandler               /* ddr Interrupt for performance monitor*/
+    .long   DDR_IRQHandler                                  /* ddr Interrupt*/
     .long   I2S4_IRQHandler                                 /* SAI4 Receive / Transmit Interrupt*/
-    .long   Reserved117_IRQHandler                          /* Reserved*/
-    .long   Reserved118_IRQHandler                          /* Reserved*/
+    .long   CPU_Error_AXI_IRQHandler                        /* CPU Error indicator for AXI transaction with a write response error condition*/
+    .long   CPU_Error_L2RAM_IRQHandler                      /* CPU Error indicator for L2 RAM double-bit ECC error*/
     .long   SDMA2_IRQHandler                                /* AND of all 48 SDMA interrupts (events) from all the channels*/
     .long   Reserved120_IRQHandler                          /* Reserved*/
-    .long   CAAM_Job_Ring0_IRQHandler                       /* CAAM interrupt queue for JQ*/
-    .long   CAAM_Job_Ring1_IRQHandler                       /* CAAM interrupt queue for JQ*/
+    .long   CAAM_IRQ0_IRQHandler                            /* CAAM interrupt queue for JQ*/
+    .long   CAAM_IRQ1_IRQHandler                            /* CAAM interrupt queue for JQ*/
     .long   QSPI_IRQHandler                                 /* QSPI Interrupt*/
-    .long   TZASC1_IRQHandler                               /* TZASC (PL380) interrupt*/
+    .long   TZASC_IRQHandler                                /* TZASC (PL380) interrupt*/
     .long   Reserved125_IRQHandler                          /* Reserved*/
     .long   Reserved126_IRQHandler                          /* Reserved*/
     .long   Reserved127_IRQHandler                          /* Reserved*/
     .long   PERFMON1_IRQHandler                             /* General Interrupt*/
     .long   PERFMON2_IRQHandler                             /* General Interrupt*/
-    .long   CAAM_Job_Ring2_IRQHandler                       /* CAAM interrupt queue for JQ*/
+    .long   CAAM_IRQ2_IRQHandler                            /* CAAM interrupt queue for JQ*/
     .long   CAAM_ERROR_IRQHandler                           /* Recoverable error interrupt*/
-    .long   HS1_IRQHandler                                  /* HS Interrupt Request 1*/
+    .long   HS_CP0_IRQHandler                               /* HS Interrupt Request*/
     .long   HEVC_IRQHandler                                 /* HEVC interrupt*/
     .long   ENET_MAC0_Rx_Tx_Done1_IRQHandler                /* MAC 0 Receive / Trasmit Frame / Buffer Done*/
     .long   ENET_MAC0_Rx_Tx_Done2_IRQHandler                /* MAC 0 Receive / Trasmit Frame / Buffer Done*/
     .long   ENET_IRQHandler                                 /* MAC 0 IRQ*/
-    .long   ENET_1588_IRQHandler                            /* MAC 0 1588 Timer Interrupt – synchronous*/
+    .long   ENET_1588_IRQHandler                            /* MAC 0 1588 Timer Interrupt - synchronous*/
     .long   PCIE_CTRL1_IRQ0_IRQHandler                      /* Coming from GLUE logic, of set / reset FF, driven by PCIE signals.*/
     .long   PCIE_CTRL1_IRQ1_IRQHandler                      /* Coming from GLUE logic, of set / reset FF, driven by PCIE signals.*/
     .long   PCIE_CTRL1_IRQ2_IRQHandler                      /* Coming from GLUE logic, of set / reset FF, driven by PCIE signals.*/
@@ -224,6 +197,7 @@ Reset_Handler:
  *      linker script.
  *      __etext: End of code section, i.e., begin of data sections to copy from.
  *      __data_start__/__data_end__: RAM address range that data should be
+ *      __noncachedata_start__/__noncachedata_end__ : none cachable region
  *      copied to. Both must be aligned to 4 bytes boundary.  */
 
     ldr    r1, =__etext
@@ -250,7 +224,6 @@ Reset_Handler:
     bgt    .LC0
 .LC1:
 #endif
-
 #ifdef __STARTUP_INITIALIZE_NONCACHEDATA
     ldr    r2, =__noncachedata_start__
     ldr    r3, =__noncachedata_init_end__
@@ -266,18 +239,18 @@ Reset_Handler:
     ble    .LC3
 .LC2:
     subs    r3, #4
-    ldr     r0, [r1, r3]
-    str     r0, [r2, r3]
+    ldr    r0, [r1, r3]
+    str    r0, [r2, r3]
     bgt    .LC2
 .LC3:
 #endif
-/* Add ncache section initializaiton */
+/* zero inited ncache section initialization */
     ldr r3, =__noncachedata_end__
-    movs    r0, 0
+    movs    r0,0
 .LC4:
-    cmp     r2, r3
+    cmp    r2,r3
     itt    lt
-    strlt   r0, [r2], #4
+    strlt   r0,[r2],#4
     blt    .LC4
 #endif /* __STARTUP_INITIALIZE_NONCACHEDATA */
 
@@ -387,6 +360,15 @@ SPDIF1_IRQHandler:
     ldr   r0,=SPDIF1_DriverIRQHandler
     bx    r0
     .size SPDIF1_IRQHandler, . - SPDIF1_IRQHandler
+
+    .align 1
+    .thumb_func
+    .weak VPUDMA_IRQHandler
+    .type VPUDMA_IRQHandler, %function
+VPUDMA_IRQHandler:
+    ldr   r0,=VPUDMA_DriverIRQHandler
+    bx    r0
+    .size VPUDMA_IRQHandler, . - VPUDMA_IRQHandler
 
     .align 1
     .thumb_func
@@ -534,12 +516,12 @@ I2S3_IRQHandler:
 
     .align 1
     .thumb_func
-    .weak I2S5_IRQHandler
-    .type I2S5_IRQHandler, %function
-I2S5_IRQHandler:
-    ldr   r0,=I2S5_DriverIRQHandler
+    .weak I2S56_IRQHandler
+    .type I2S56_IRQHandler, %function
+I2S56_IRQHandler:
+    ldr   r0,=I2S56_DriverIRQHandler
     bx    r0
-    .size I2S5_IRQHandler, . - I2S5_IRQHandler
+    .size I2S56_IRQHandler, . - I2S56_IRQHandler
 
     .align 1
     .thumb_func
@@ -644,24 +626,24 @@ ENET_1588_IRQHandler:
     def_irq_handler    LCDIF_IRQHandler
     def_irq_handler    SPDIF1_DriverIRQHandler
     def_irq_handler    H264_IRQHandler
-    def_irq_handler    VPU_IRQHandler
+    def_irq_handler    VPUDMA_DriverIRQHandler
     def_irq_handler    QOS_IRQHandler
     def_irq_handler    WDOG3_IRQHandler
-    def_irq_handler    HS0_IRQHandler
+    def_irq_handler    HS_CP1_IRQHandler
     def_irq_handler    APBHDMA_DriverIRQHandler
     def_irq_handler    SPDIF2_DriverIRQHandler
     def_irq_handler    BCH_IRQHandler
     def_irq_handler    GPMI_IRQHandler
-    def_irq_handler    Reserved32_IRQHandler
-    def_irq_handler    Reserved33_IRQHandler
-    def_irq_handler    Reserved34_IRQHandler
+    def_irq_handler    HDMI_IRQ0_IRQHandler
+    def_irq_handler    HDMI_IRQ1_IRQHandler
+    def_irq_handler    HDMI_IRQ2_IRQHandler
     def_irq_handler    SNVS_Consolidated_IRQHandler
     def_irq_handler    SNVS_Security_IRQHandler
     def_irq_handler    CSU_IRQHandler
     def_irq_handler    USDHC1_DriverIRQHandler
     def_irq_handler    USDHC2_DriverIRQHandler
     def_irq_handler    DDC_IRQHandler
-    def_irq_handler    HDMI_IRQHandler
+    def_irq_handler    DTRC_IRQHandler
     def_irq_handler    UART1_DriverIRQHandler
     def_irq_handler    UART2_DriverIRQHandler
     def_irq_handler    UART3_DriverIRQHandler
@@ -685,7 +667,7 @@ ENET_1588_IRQHandler:
     def_irq_handler    GPT6_IRQHandler
     def_irq_handler    SCTR_IRQ0_IRQHandler
     def_irq_handler    SCTR_IRQ1_IRQHandler
-    def_irq_handler    TEMPMON_LOW_IRQHandler
+    def_irq_handler    TEMPMON_IRQHandler
     def_irq_handler    I2S3_DriverIRQHandler
     def_irq_handler    GPT5_IRQHandler
     def_irq_handler    GPT4_IRQHandler
@@ -721,12 +703,12 @@ ENET_1588_IRQHandler:
     def_irq_handler    PWM2_IRQHandler
     def_irq_handler    PWM3_IRQHandler
     def_irq_handler    PWM4_IRQHandler
-    def_irq_handler    CCM1_IRQHandler
-    def_irq_handler    CCM2_IRQHandler
+    def_irq_handler    CCM_IRQ1_IRQHandler
+    def_irq_handler    CCM_IRQ2_IRQHandler
     def_irq_handler    GPC_IRQHandler
     def_irq_handler    MU_A53_IRQHandler
     def_irq_handler    SRC_IRQHandler
-    def_irq_handler    I2S5_DriverIRQHandler
+    def_irq_handler    I2S56_DriverIRQHandler
     def_irq_handler    RTIC_IRQHandler
     def_irq_handler    CPU_PerformanceUnit_IRQHandler
     def_irq_handler    CPU_CTI_Trigger_IRQHandler
@@ -734,25 +716,25 @@ ENET_1588_IRQHandler:
     def_irq_handler    I2S1_DriverIRQHandler
     def_irq_handler    I2S2_DriverIRQHandler
     def_irq_handler    MU_M4_IRQHandler
-    def_irq_handler    Reserved114_IRQHandler
-    def_irq_handler    Reserved115_IRQHandler
+    def_irq_handler    DDR_PerformanceMonitor_IRQHandler
+    def_irq_handler    DDR_IRQHandler
     def_irq_handler    I2S4_DriverIRQHandler
-    def_irq_handler    Reserved117_IRQHandler
-    def_irq_handler    Reserved118_IRQHandler
+    def_irq_handler    CPU_Error_AXI_IRQHandler
+    def_irq_handler    CPU_Error_L2RAM_IRQHandler
     def_irq_handler    SDMA2_DriverIRQHandler
     def_irq_handler    Reserved120_IRQHandler
-    def_irq_handler    CAAM_Job_Ring0_IRQHandler
-    def_irq_handler    CAAM_Job_Ring1_IRQHandler
+    def_irq_handler    CAAM_IRQ0_IRQHandler
+    def_irq_handler    CAAM_IRQ1_IRQHandler
     def_irq_handler    QSPI_DriverIRQHandler
-    def_irq_handler    TZASC1_IRQHandler
+    def_irq_handler    TZASC_IRQHandler
     def_irq_handler    Reserved125_IRQHandler
     def_irq_handler    Reserved126_IRQHandler
     def_irq_handler    Reserved127_IRQHandler
     def_irq_handler    PERFMON1_IRQHandler
     def_irq_handler    PERFMON2_IRQHandler
-    def_irq_handler    CAAM_Job_Ring2_IRQHandler
+    def_irq_handler    CAAM_IRQ2_IRQHandler
     def_irq_handler    CAAM_ERROR_IRQHandler
-    def_irq_handler    HS1_IRQHandler
+    def_irq_handler    HS_CP0_IRQHandler
     def_irq_handler    HEVC_IRQHandler
     def_irq_handler    ENET_MAC0_Rx_Tx_Done1_DriverIRQHandler
     def_irq_handler    ENET_MAC0_Rx_Tx_Done2_DriverIRQHandler

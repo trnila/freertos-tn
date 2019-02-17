@@ -1,34 +1,8 @@
 /*
- * The Clear BSD License
  * Copyright 2017 NXP
  * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted (subject to the limitations in the disclaimer below) provided
- *  that the following conditions are met:
  *
- * o Redistributions of source code must retain the above copyright notice, this list
- *   of conditions and the following disclaimer.
- *
- * o Redistributions in binary form must reproduce the above copyright notice, this
- *   list of conditions and the following disclaimer in the documentation and/or
- *   other materials provided with the distribution.
- *
- * o Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from this
- *   software without specific prior written permission.
- *
- * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS LICENSE.
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "fsl_sema4.h"
@@ -36,6 +10,12 @@
 /******************************************************************************
  * Definitions
  *****************************************************************************/
+
+/* Component ID definition, used by tools. */
+#ifndef FSL_COMPONENT_ID
+#define FSL_COMPONENT_ID "platform.drivers.sema4"
+#endif
+
 /* The first number write to RSTGDP when reset SEMA4 gate. */
 #define SEMA4_GATE_RESET_PATTERN_1 (0xE2U)
 /* The second number write to RSTGDP when reset SEMA4 gate. */
@@ -103,6 +83,16 @@ uint32_t SEMA4_GetInstance(SEMA4_Type *base)
 }
 #endif
 
+/*!
+ * brief Initializes the SEMA4 module.
+ *
+ * This function initializes the SEMA4 module. It only enables the clock but does
+ * not reset the gates because the module might be used by other processors
+ * at the same time. To reset the gates, call either SEMA4_ResetGate or
+ * SEMA4_ResetAllGates function.
+ *
+ * param base SEMA4 peripheral base address.
+ */
 void SEMA4_Init(SEMA4_Type *base)
 {
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
@@ -112,6 +102,13 @@ void SEMA4_Init(SEMA4_Type *base)
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 }
 
+/*!
+ * brief De-initializes the SEMA4 module.
+ *
+ * This function de-initializes the SEMA4 module. It only disables the clock.
+ *
+ * param base SEMA4 peripheral base address.
+ */
 void SEMA4_Deinit(SEMA4_Type *base)
 {
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
@@ -121,6 +118,19 @@ void SEMA4_Deinit(SEMA4_Type *base)
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 }
 
+/*!
+ * brief Tries to lock the SEMA4 gate.
+ *
+ * This function tries to lock the specific SEMA4 gate. If the gate has been
+ * locked by another processor, this function returns an error code.
+ *
+ * param base SEMA4 peripheral base address.
+ * param gateNum  Gate number to lock.
+ * param procNum  Current processor number.
+ *
+ * retval kStatus_Success     Lock the sema4 gate successfully.
+ * retval kStatus_Fail Sema4 gate has been locked by another processor.
+ */
 status_t SEMA4_TryLock(SEMA4_Type *base, uint8_t gateNum, uint8_t procNum)
 {
     assert(gateNum < FSL_FEATURE_SEMA4_GATE_COUNT);
@@ -139,6 +149,17 @@ status_t SEMA4_TryLock(SEMA4_Type *base, uint8_t gateNum, uint8_t procNum)
     return kStatus_Success;
 }
 
+/*!
+ * brief Locks the SEMA4 gate.
+ *
+ * This function locks the specific SEMA4 gate. If the gate has been
+ * locked by other processors, this function waits until it is unlocked and then
+ * lock it.
+ *
+ * param base SEMA4 peripheral base address.
+ * param gateNum  Gate number to lock.
+ * param procNum  Current processor number.
+ */
 void SEMA4_Lock(SEMA4_Type *base, uint8_t gateNum, uint8_t procNum)
 {
     assert(gateNum < FSL_FEATURE_SEMA4_GATE_COUNT);
@@ -157,6 +178,17 @@ void SEMA4_Lock(SEMA4_Type *base, uint8_t gateNum, uint8_t procNum)
     }
 }
 
+/*!
+ * brief Resets the SEMA4 gate to an unlocked status.
+ *
+ * This function resets a SEMA4 gate to an unlocked status.
+ *
+ * param base SEMA4 peripheral base address.
+ * param gateNum  Gate number.
+ *
+ * retval kStatus_Success         SEMA4 gate is reset successfully.
+ * retval kStatus_Fail Some other reset process is ongoing.
+ */
 status_t SEMA4_ResetGate(SEMA4_Type *base, uint8_t gateNum)
 {
     /*
@@ -179,6 +211,17 @@ status_t SEMA4_ResetGate(SEMA4_Type *base, uint8_t gateNum)
     return kStatus_Success;
 }
 
+/*!
+ * brief Resets the SEMA4 gate IRQ notification.
+ *
+ * This function resets a SEMA4 gate IRQ notification.
+ *
+ * param base SEMA4 peripheral base address.
+ * param gateNum  Gate number.
+ *
+ * retval kStatus_Success Reset successfully.
+ * retval kStatus_Fail    Some other reset process is ongoing.
+ */
 status_t SEMA4_ResetGateNotify(SEMA4_Type *base, uint8_t gateNum)
 {
     /*

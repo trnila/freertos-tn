@@ -18,8 +18,12 @@
  * limitations under the License.
  */
 
-
 #include "fsl_i2c_cmsis.h"
+
+/* Component ID definition, used by tools. */
+#ifndef FSL_COMPONENT_ID
+#define FSL_COMPONENT_ID "platform.drivers.ii2c_cmsis"
+#endif
 
 #if ((RTE_I2C0 && defined(I2C0)) || (RTE_I2C1 && defined(I2C1)) || (RTE_I2C2 && defined(I2C2)) || \
      (RTE_I2C3 && defined(I2C3)) || (RTE_I2C4 && defined(I2C4)))
@@ -30,7 +34,7 @@
  * ARMCC does not support split the data section automatically, so the driver
  * needs to split the data to separate sections explicitly, to reduce codesize.
  */
-#if defined(__CC_ARM)
+#if defined(__CC_ARM) || defined(__ARMCC_VERSION)
 #define ARMCC_SECTION(section_name) __attribute__((section(section_name)))
 #endif
 
@@ -519,7 +523,7 @@ cmsis_i2c_resource_t I2C0_Resource = {I2C0, I2C0_GetFreq};
 
 cmsis_i2c_handle_t I2C0_handle;
 
-#if defined(__CC_ARM)
+#if defined(__CC_ARM) || defined(__ARMCC_VERSION)
 ARMCC_SECTION("i2c0_interrupt_driver_state")
 cmsis_i2c_interrupt_driver_state_t I2C0_InterruptDriverState = {
 #else
@@ -607,7 +611,7 @@ extern void I2C1_DeinitPins(void);
 cmsis_i2c_resource_t I2C1_Resource = {I2C1, I2C1_GetFreq};
 cmsis_i2c_handle_t I2C1_Handle;
 
-#if defined(__CC_ARM)
+#if defined(__CC_ARM) || defined(__ARMCC_VERSION)
 ARMCC_SECTION("i2c1_interrupt_driver_state")
 cmsis_i2c_interrupt_driver_state_t I2C1_InterruptDriverState = {
 #else
@@ -695,7 +699,7 @@ cmsis_i2c_resource_t I2C2_Resource = {I2C2, I2C2_GetFreq};
 
 cmsis_i2c_handle_t I2C2_Handle;
 
-#if defined(__CC_ARM)
+#if defined(__CC_ARM) || defined(__ARMCC_VERSION)
 ARMCC_SECTION("i2c2_interrupt_driver_state")
 cmsis_i2c_interrupt_driver_state_t I2C2_InterruptDriverState = {
 #else
@@ -783,7 +787,7 @@ extern void I2C3_DeinitPins(void);
 cmsis_i2c_resource_t I2C3_Resource = {I2C3, I2C3_GetFreq};
 cmsis_i2c_handle_t I2C3_Handle;
 
-#if defined(__CC_ARM)
+#if defined(__CC_ARM) || defined(__ARMCC_VERSION)
 ARMCC_SECTION("i2c3_interrupt_driver_state")
 cmsis_i2c_interrupt_driver_state_t I2C3_InterruptDriverState = {
 #else
@@ -870,7 +874,7 @@ extern void I2C4_DeinitPins(void);
 cmsis_i2c_resource_t I2C4_Resource = {I2C4, I2C4_GetFreq};
 cmsis_i2c_handle_t I2C4_Handle;
 
-#if defined(__CC_ARM)
+#if defined(__CC_ARM) || defined(__ARMCC_VERSION)
 ARMCC_SECTION("i2c3_interrupt_driver_state")
 cmsis_i2c_interrupt_driver_state_t I2C4_InterruptDriverState = {
 #else

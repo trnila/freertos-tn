@@ -19,7 +19,7 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"group__rpmsg__lite.html"
+"group__config.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

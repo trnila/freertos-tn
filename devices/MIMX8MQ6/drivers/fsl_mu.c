@@ -1,38 +1,17 @@
 /*
- * The Clear BSD License
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
  * Copyright 2016-2017 NXP
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted (subject to the limitations in the disclaimer below) provided
- * that the following conditions are met:
- *
- * o Redistributions of source code must retain the above copyright notice, this list
- *   of conditions and the following disclaimer.
- *
- * o Redistributions in binary form must reproduce the above copyright notice, this
- *   list of conditions and the following disclaimer in the documentation and/or
- *   other materials provided with the distribution.
- *
- * o Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from this
- *   software without specific prior written permission.
- *
- * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS LICENSE.
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "fsl_mu.h"
+
+/* Component ID definition, used by tools. */
+#ifndef FSL_COMPONENT_ID
+#define FSL_COMPONENT_ID "platform.drivers.mu"
+#endif
 
 /*******************************************************************************
  * Variables
@@ -65,6 +44,13 @@ static uint32_t MU_GetInstance(MU_Type *base)
     return instance;
 }
 
+/*!
+ * brief Initializes the MU module.
+ *
+ * This function enables the MU clock only.
+ *
+ * param base MU peripheral base address.
+ */
 void MU_Init(MU_Type *base)
 {
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
@@ -72,6 +58,13 @@ void MU_Init(MU_Type *base)
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 }
 
+/*!
+ * brief De-initializes the MU module.
+ *
+ * This function disables the MU clock only.
+ *
+ * param base MU peripheral base address.
+ */
 void MU_Deinit(MU_Type *base)
 {
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
@@ -79,6 +72,15 @@ void MU_Deinit(MU_Type *base)
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 }
 
+/*!
+ * brief Blocks to send a message.
+ *
+ * This function waits until the TX register is empty and sends the message.
+ *
+ * param base MU peripheral base address.
+ * param regIndex  TX register index.
+ * param msg      Message to send.
+ */
 void MU_SendMsg(MU_Type *base, uint32_t regIndex, uint32_t msg)
 {
     assert(regIndex < MU_TR_COUNT);
@@ -91,6 +93,15 @@ void MU_SendMsg(MU_Type *base, uint32_t regIndex, uint32_t msg)
     base->TR[regIndex] = msg;
 }
 
+/*!
+ * brief Blocks to receive a message.
+ *
+ * This function waits until the RX register is full and receives the message.
+ *
+ * param base MU peripheral base address.
+ * param regIndex  RX register index.
+ * return The received message.
+ */
 uint32_t MU_ReceiveMsg(MU_Type *base, uint32_t regIndex)
 {
     assert(regIndex < MU_TR_COUNT);
@@ -103,6 +114,19 @@ uint32_t MU_ReceiveMsg(MU_Type *base, uint32_t regIndex)
     return base->RR[regIndex];
 }
 
+/*!
+ * brief Blocks setting the 3-bit MU flags reflect on the other MU side.
+ *
+ * This function blocks setting the 3-bit MU flags. Every time the 3-bit MU flags are changed,
+ * the status flag \c kMU_FlagsUpdatingFlag asserts indicating the 3-bit MU flags are
+ * updating to the other side. After the 3-bit MU flags are updated, the status flag
+ * \c kMU_FlagsUpdatingFlag is cleared by hardware. During the flags updating period,
+ * the flags cannot be changed. This function waits for the MU status flag
+ * \c kMU_FlagsUpdatingFlag cleared and sets the 3-bit MU flags.
+ *
+ * param base MU peripheral base address.
+ * param flags The 3-bit MU flags to set.
+ */
 void MU_SetFlags(MU_Type *base, uint32_t flags)
 {
     /* Wait for update finished. */
@@ -113,6 +137,28 @@ void MU_SetFlags(MU_Type *base, uint32_t flags)
     MU_SetFlagsNonBlocking(base, flags);
 }
 
+/*!
+ * brief Triggers interrupts to the other core.
+ *
+ * This function triggers the specific interrupts to the other core. The interrupts
+ * to trigger are passed in as bit mask. See \ref _mu_interrupt_trigger.
+ * The MU should not trigger an interrupt to the other core when the previous interrupt
+ * has not been processed by the other core. This function checks whether the
+ * previous interrupts have been processed. If not, it returns an error.
+ *
+ * code
+ * if (kStatus_Success != MU_TriggerInterrupts(base, kMU_GenInt0InterruptTrigger | kMU_GenInt2InterruptTrigger))
+ * {
+ *     // Previous general purpose interrupt 0 or general purpose interrupt 2
+ *     // has not been processed by the other core.
+ * }
+ * endcode
+ *
+ * param base MU peripheral base address.
+ * param mask Bit mask of the interrupts to trigger. See _mu_interrupt_trigger.
+ * retval kStatus_Success    Interrupts have been triggered successfully.
+ * retval kStatus_Fail       Previous interrupts have not been accepted.
+ */
 status_t MU_TriggerInterrupts(MU_Type *base, uint32_t mask)
 {
     uint32_t reg = base->CR;
@@ -132,6 +178,16 @@ status_t MU_TriggerInterrupts(MU_Type *base, uint32_t mask)
 }
 
 #if !(defined(FSL_FEATURE_MU_NO_RSTH) && FSL_FEATURE_MU_NO_RSTH)
+/*!
+ * brief Boots the core at B side.
+ *
+ * This function sets the B side core's boot configuration and releases the
+ * core from reset.
+ *
+ * param base MU peripheral base address.
+ * param mode Core B boot mode.
+ * note Only MU side A can use this function.
+ */
 void MU_BootCoreB(MU_Type *base, mu_core_boot_mode_t mode)
 {
 #if (defined(FSL_FEATURE_MU_HAS_RESET_INT) && FSL_FEATURE_MU_HAS_RESET_INT)
@@ -155,6 +211,14 @@ void MU_BootCoreB(MU_Type *base, mu_core_boot_mode_t mode)
 #endif
 }
 
+/*!
+ * brief Boots the other core.
+ *
+ * This function boots the other core with a boot configuration.
+ *
+ * param base MU peripheral base address.
+ * param mode The other core boot mode.
+ */
 void MU_BootOtherCore(MU_Type *base, mu_core_boot_mode_t mode)
 {
     /*
@@ -167,6 +231,43 @@ void MU_BootOtherCore(MU_Type *base, mu_core_boot_mode_t mode)
 
 #if !(defined(FSL_FEATURE_MU_NO_HR) && FSL_FEATURE_MU_NO_HR)
 #if (defined(FSL_FEATURE_MU_HAS_CCR) && FSL_FEATURE_MU_HAS_CCR)
+/*!
+ * brief Hardware reset the other core.
+ *
+ * This function resets the other core, the other core could mask the
+ * hardware reset by calling ref MU_MaskHardwareReset. The hardware reset
+ * mask feature is only available for some platforms.
+ * This function could be used together with MU_BootOtherCore to control the
+ * other core reset workflow.
+ *
+ * Example 1: Reset the other core, and no hold reset
+ * code
+ * MU_HardwareResetOtherCore(MU_A, true, false, bootMode);
+ * endcode
+ * In this example, the core at MU side B will reset with the specified boot mode.
+ *
+ * Example 2: Reset the other core and hold it, then boot the other core later.
+ * code
+ * // Here the other core enters reset, and the reset is hold
+ * MU_HardwareResetOtherCore(MU_A, true, true, modeDontCare);
+ * // Current core boot the other core when necessary.
+ * MU_BootOtherCore(MU_A, bootMode);
+ * endcode
+ *
+ * param base MU peripheral base address.
+ * param waitReset Wait the other core enters reset.
+ *                    - true: Wait until the other core enters reset, if the other
+ *                      core has masked the hardware reset, then this function will
+ *                      be blocked.
+ *                    - false: Don't wait the reset.
+ * param holdReset Hold the other core reset or not.
+ *                    - true: Hold the other core in reset, this function returns
+ *                      directly when the other core enters reset.
+ *                    - false: Don't hold the other core in reset, this function
+ *                      waits until the other core out of reset.
+ * param bootMode Boot mode of the other core, if p holdReset is true, this
+ *                 parameter is useless.
+ */
 void MU_HardwareResetOtherCore(MU_Type *base, bool waitReset, bool holdReset, mu_core_boot_mode_t bootMode)
 {
 #if (defined(FSL_FEATURE_MU_NO_RSTH) && FSL_FEATURE_MU_NO_RSTH)
@@ -211,6 +312,43 @@ void MU_HardwareResetOtherCore(MU_Type *base, bool waitReset, bool holdReset, mu
     }
 }
 #else /* FSL_FEATURE_MU_HAS_CCR */
+/*!
+ * brief Hardware reset the other core.
+ *
+ * This function resets the other core, the other core could mask the
+ * hardware reset by calling ref MU_MaskHardwareReset. The hardware reset
+ * mask feature is only available for some platforms.
+ * This function could be used together with MU_BootOtherCore to control the
+ * other core reset workflow.
+ *
+ * Example 1: Reset the other core, and no hold reset
+ * code
+ * MU_HardwareResetOtherCore(MU_A, true, false, bootMode);
+ * endcode
+ * In this example, the core at MU side B will reset with the specified boot mode.
+ *
+ * Example 2: Reset the other core and hold it, then boot the other core later.
+ * code
+ * // Here the other core enters reset, and the reset is hold
+ * MU_HardwareResetOtherCore(MU_A, true, true, modeDontCare);
+ * // Current core boot the other core when necessary.
+ * MU_BootOtherCore(MU_A, bootMode);
+ * endcode
+ *
+ * param base MU peripheral base address.
+ * param waitReset Wait the other core enters reset.
+ *                    - true: Wait until the other core enters reset, if the other
+ *                      core has masked the hardware reset, then this function will
+ *                      be blocked.
+ *                    - false: Don't wait the reset.
+ * param holdReset Hold the other core reset or not.
+ *                    - true: Hold the other core in reset, this function returns
+ *                      directly when the other core enters reset.
+ *                    - false: Don't hold the other core in reset, this function
+ *                      waits until the other core out of reset.
+ * param bootMode Boot mode of the other core, if p holdReset is true, this
+ *                 parameter is useless.
+ */
 void MU_HardwareResetOtherCore(MU_Type *base, bool waitReset, bool holdReset, mu_core_boot_mode_t bootMode)
 {
 #if (defined(FSL_FEATURE_MU_NO_RSTH) && FSL_FEATURE_MU_NO_RSTH)

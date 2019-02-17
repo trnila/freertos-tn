@@ -51,15 +51,17 @@ add_library(mcuxpressosdk
   "${M4SDK_PATH}/devices/MIMX8MQ6/drivers/fsl_common.c"
   "${M4SDK_PATH}/devices/MIMX8MQ6/drivers/fsl_rdc.h"
   "${M4SDK_PATH}/devices/MIMX8MQ6/drivers/fsl_rdc.c"
-  "${M4SDK_PATH}/devices/MIMX8MQ6/utilities/io/fsl_io.c"
-  "${M4SDK_PATH}/devices/MIMX8MQ6/utilities/io/fsl_io.h"
-  "${M4SDK_PATH}/devices/MIMX8MQ6/utilities/log/fsl_log.c"
-  "${M4SDK_PATH}/devices/MIMX8MQ6/utilities/log/fsl_log.h"
   "${M4SDK_PATH}/devices/MIMX8MQ6/utilities/str/fsl_str.c"
   "${M4SDK_PATH}/devices/MIMX8MQ6/utilities/str/fsl_str.h"
-  "${M4SDK_PATH}/devices/MIMX8MQ6/utilities/fsl_debug_console.c"
-  "${M4SDK_PATH}/devices/MIMX8MQ6/utilities/fsl_debug_console.h"
-  "${M4SDK_PATH}/devices/MIMX8MQ6/utilities/fsl_debug_console_conf.h"
+  "${M4SDK_PATH}/devices/MIMX8MQ6/utilities/debug_console/fsl_debug_console.c"
+  "${M4SDK_PATH}/devices/MIMX8MQ6/utilities/debug_console/fsl_debug_console.h"
+  "${M4SDK_PATH}/devices/MIMX8MQ6/utilities/debug_console/fsl_debug_console_conf.h"
+  "${M4SDK_PATH}/components/uart/uart.h"
+  "${M4SDK_PATH}/components/uart/iuart_adapter.c"
+  "${M4SDK_PATH}/components/serial_manager/serial_manager.h"
+  "${M4SDK_PATH}/components/serial_manager/serial_manager.c"
+  "${M4SDK_PATH}/components/serial_manager/serial_port_uart.h"
+  "${M4SDK_PATH}/components/serial_manager/serial_port_uart.c"
   "${M4SDK_PATH}/devices/MIMX8MQ6/system_MIMX8MQ6_cm4.c"
   "${M4SDK_PATH}/devices/MIMX8MQ6/system_MIMX8MQ6_cm4.h"
   "${M4SDK_PATH}/devices/MIMX8MQ6/gcc/startup_MIMX8MQ6_cm4.S"
@@ -89,6 +91,9 @@ target_include_directories(mcuxpressosdk
     ${M4SDK_PATH}/devices/MIMX8MQ6/utilities/io
     ${M4SDK_PATH}/devices/MIMX8MQ6/utilities/str
     ${M4SDK_PATH}/devices/MIMX8MQ6/utilities/log
+    ${M4SDK_PATH}/devices/MIMX8MQ6/utilities/debug_console
     ${M4SDK_PATH}/devices/MIMX8MQ6/utilities
+    ${M4SDK_PATH}/components/serial_manager
+    ${M4SDK_PATH}/components/uart
     ${M4SDK_PATH}/boards/pico-8m-m4/skel/
 )

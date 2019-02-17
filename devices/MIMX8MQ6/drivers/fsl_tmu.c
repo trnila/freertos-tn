@@ -1,37 +1,16 @@
 /*
- * The Clear BSD License
  * Copyright (c) 2017, NXP
  * All rights reserved.
  *
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted (subject to the limitations in the disclaimer below) provided
- * that the following conditions are met:
- *
- * o Redistributions of source code must retain the above copyright notice, this list
- *   of conditions and the following disclaimer.
- *
- * o Redistributions in binary form must reproduce the above copyright notice, this
- *   list of conditions and the following disclaimer in the documentation and/or
- *   other materials provided with the distribution.
- *
- * o Neither the name of copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from this
- *   software without specific prior written permission.
- *
- * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS LICENSE.
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 #include "fsl_tmu.h"
+
+/* Component ID definition, used by tools. */
+#ifndef FSL_COMPONENT_ID
+#define FSL_COMPONENT_ID "platform.drivers.tmu"
+#endif
 
 /*******************************************************************************
  * Prototypes
@@ -56,9 +35,10 @@ static void TMU_SetTranslationTable(TMU_Type *base);
 /*! @brief Pointers to TMU bases for each instance. */
 static TMU_Type *const s_tmuBases[] = TMU_BASE_PTRS;
 
+#if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
 /*! @brief Pointers to TMU clocks for each instance. */
 static const clock_ip_name_t s_tmuClocks[] = TMU_CLOCKS;
-
+#endif
 /*******************************************************************************
  * Code
  ******************************************************************************/
@@ -158,6 +138,12 @@ static void TMU_SetTranslationTable(TMU_Type *base)
     base->TTCFGR = 0x00030003U;
     base->TSCFGR = 0x00000055U;
 }
+/*!
+* brief Enable the access to TMU registers and Initialize TMU module.
+*
+* param base TMU peripheral base address.
+* param config Pointer to configuration structure. Refer to "tmu_config_t" structure.
+*/
 void TMU_Init(TMU_Type *base, const tmu_config_t *config)
 {
     assert(NULL != base);
@@ -185,6 +171,11 @@ void TMU_Init(TMU_Type *base, const tmu_config_t *config)
     base->TMTMIR = TMU_TMTMIR_TMI(config->monitorInterval);
 }
 
+/*!
+* brief De-initialize TMU module and Disable the access to DCDC registers.
+*
+* param base TMU peripheral base address.
+*/
 void TMU_Deinit(TMU_Type *base)
 {
     /* Disable TMU monitor mode.. */
@@ -195,15 +186,39 @@ void TMU_Deinit(TMU_Type *base)
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL. */
 }
 
+/*!
+ * brief Gets the default configuration for TMU.
+ *
+ * This function initializes the user configuration structure to default value. The default value are:
+ *
+ * Example:
+   code
+   config->monitorInterval = 0U;
+   config->monitorSiteSelection = 0U;
+   config->averageLPF = kTMU_AverageLowPassFilter1_0;
+   endcode
+ *
+ * param config Pointer to TMU configuration structure.
+ */
 void TMU_GetDefaultConfig(tmu_config_t *config)
 {
     assert(NULL != config);
+
+    /* Initializes the configure structure to zero. */
+    memset(config, 0, sizeof(*config));
 
     config->monitorInterval = 0U;
     config->monitorSiteSelection = 0U; /* If no site is selected, site 0 is monitored by default. */
     config->averageLPF = kTMU_AverageLowPassFilter1_0;
 }
 
+/*!
+* brief Get interrupt status flags.
+*
+* param base TMU peripheral base address.
+* param status The pointer to interrupt status structure. Record the current interrupt status.
+*        Please refer to "tmu_interrupt_status_t" structure.
+*/
 void TMU_GetInterruptStatusFlags(TMU_Type *base, tmu_interrupt_status_t *status)
 {
     assert(NULL != status);
@@ -214,6 +229,12 @@ void TMU_GetInterruptStatusFlags(TMU_Type *base, tmu_interrupt_status_t *status)
     status->AverageCriticalInterruptsSiteMask = (TMU_TICSCR_CASITE_MASK & base->TICSCR) >> TMU_TICSCR_CASITE_SHIFT;
 }
 
+/*!
+* brief Clear interrupt status flags and corresponding interrupt critical site capture register.
+*
+* param base TMU peripheral base address.
+* param The mask of interrupt status flags. Refer to "_tmu_interrupt_status_flags" enumeration.
+*/
 void TMU_ClearInterruptStatusFlags(TMU_Type *base, uint32_t mask)
 {
     /* For immediate temperature threshold interrupt. */
@@ -236,6 +257,18 @@ void TMU_ClearInterruptStatusFlags(TMU_Type *base, uint32_t mask)
     }
 }
 
+/*!
+* brief Get the highest temperature reached for any enabled monitored site within the temperature
+*        sensor range.
+*
+* param base TMU peripheral base address.
+* param temperature Highest temperature recorded in degrees Celsius by any enabled monitored site.
+*
+* return Execution status.
+* retval kStatus_Success Temperature reading is valid.
+* retval kStatus_Fail    Temperature reading is not valid due to no measured temperature within the
+*                         sensor range of 0-125 °C for an enabled monitored site.
+*/
 status_t TMU_GetHighestTemperature(TMU_Type *base, uint32_t *temperature)
 {
     assert(NULL != temperature);
@@ -251,6 +284,18 @@ status_t TMU_GetHighestTemperature(TMU_Type *base, uint32_t *temperature)
     }
 }
 
+/*!
+* brief Get the lowest temperature reached for any enabled monitored site within the temperature
+*        sensor range.
+*
+* param base TMU peripheral base address.
+* param temperature Lowest temperature recorded in degrees Celsius by any enabled monitored site.
+*
+* return Execution status.
+* retval kStatus_Success Temperature reading is valid.
+* retval kStatus_Fail    Temperature reading is not valid due to no measured temperature within the
+*                         sensor range of 0-125 °C for an enabled monitored site.
+*/
 status_t TMU_GetLowestTemperature(TMU_Type *base, uint32_t *temperature)
 {
     assert(NULL != temperature);
@@ -266,6 +311,19 @@ status_t TMU_GetLowestTemperature(TMU_Type *base, uint32_t *temperature)
     }
 }
 
+/*!
+* brief Get the last immediate temperature at site n. The site must be part of the list of enabled
+*        monitored sites as defined by monitorSiteSelection in "tmu_config_t" structure.
+*
+* param base TMU peripheral base address.
+* param siteIndex The index of the site user want to read. 0U: site0 ~ 15U: site15.
+* param temperature Last immediate temperature reading at site n .
+*
+* return Execution status.
+* retval kStatus_Success Temperature reading is valid.
+* retval kStatus_Fail    Temperature reading is not valid because temperature out of sensor range or
+*                         first measurement still pending.
+*/
 status_t TMU_GetImmediateTemperature(TMU_Type *base, uint32_t siteIndex, uint32_t *temperature)
 {
     assert(NULL != temperature);
@@ -282,6 +340,19 @@ status_t TMU_GetImmediateTemperature(TMU_Type *base, uint32_t siteIndex, uint32_
     }
 }
 
+/*!
+* brief Get the last average temperature at site n. The site must be part of the list of enabled
+*        monitored sites as defined by monitorSiteSelection in "tmu_config_t" structure.
+*
+* param base TMU peripheral base address.
+* param siteIndex The index of the site user want to read. 0U: site0 ~ 15U: site15.
+* param temperature Last average temperature reading at site n .
+*
+* return Execution status.
+* retval kStatus_Success Temperature reading is valid.
+* retval kStatus_Fail    Temperature reading is not valid because temperature out of sensor range or
+*                         first measurement still pending.
+*/
 status_t TMU_GetAverageTemperature(TMU_Type *base, uint32_t siteIndex, uint32_t *temperature)
 {
     assert(NULL != temperature);
@@ -298,6 +369,12 @@ status_t TMU_GetAverageTemperature(TMU_Type *base, uint32_t siteIndex, uint32_t 
     }
 }
 
+/*!
+* brief Configure the high temperature thresold value and enable/disable relevant thresold.
+*
+* param base TMU peripheral base address.
+* param config Pointer to configuration structure. Refer to "tmu_thresold_config_t" structure.
+*/
 void TMU_SetHighTemperatureThresold(TMU_Type *base, const tmu_thresold_config_t *config)
 {
     assert(NULL != config);

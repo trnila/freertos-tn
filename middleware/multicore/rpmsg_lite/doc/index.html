@@ -34,7 +34,7 @@
   <td id="projectlogo"><img alt="Logo" src="nxp_logo_small.png"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">RPMsg-Lite User&#39;s Guide
-   &#160;<span id="projectnumber">Rev. 1.2</span>
+   &#160;<span id="projectnumber">Rev. 2.0.2</span>
    </div>
    <div id="projectbrief">NXP Semiconductors</div>
   </td>
@@ -169,7 +169,7 @@ Usage</h1>
 RPMsg Lite copy and no-copy interface, multiple scenarios</div></div>
  <h1><a class="anchor" id="configuration"></a>
 Configuration options</h1>
-<p>The RPMsg-Lite can be configured at the compile time. The default configuration is defined in the rpmsg_default_config.h header file. This configuration can be customized by the user by including rpmsg_config.h file with custom settings. The following table summarizes all possible RPMsg-Lite configuration options.</p>
+<p>The RPMsg-Lite can be configured at the compile time. The default configuration is defined in the <a class="el" href="rpmsg__default__config_8h.html">rpmsg_default_config.h</a> header file. This configuration can be customized by the user by including rpmsg_config.h file with custom settings. The following table summarizes all possible RPMsg-Lite configuration options.</p>
 <table class="doxtable">
 <tr>
 <th>Configuration option </th><th>Default value </th><th>Usage  </th></tr>
@@ -186,9 +186,9 @@ Configuration options</h1>
 <tr>
 <td>RL_CLEAR_USED_BUFFERS </td><td>(0) </td><td>Clearing used buffers before returning back to the pool of free buffers enabled/disabled </td></tr>
 <tr>
-<td>RL_USE_MCMGR_IPC_ISR_HANDLER </td><td>(1) </td><td>When enabled IPC interrupts are managed by the Multicore Manager (IPC interrupts router), when disabled RPMsg-Lite manages IPC interrupts by itself </td></tr>
+<td>RL_USE_MCMGR_IPC_ISR_HANDLER </td><td>(0) </td><td>When enabled IPC interrupts are managed by the Multicore Manager (IPC interrupts router), when disabled RPMsg-Lite manages IPC interrupts by itself </td></tr>
 <tr>
-<td>RL_ASSERT </td><td>see rpmsg_default_config.h </td><td>Assert implementation </td></tr>
+<td>RL_ASSERT </td><td>see <a class="el" href="rpmsg__default__config_8h.html">rpmsg_default_config.h</a> </td><td>Assert implementation </td></tr>
 </table>
 <h1><a class="anchor" id="references"></a>
 References</h1>
@@ -214,6 +214,15 @@ Revision History</h1>
 <p>Added user data into RPMsg Nameservice callback </p>
 <p>Added the RL_CLEAR_USED_BUFFERS configuration option to allow clearing used buffers before returning back to the pool of free buffers </p>
 <p class="endtd">Added the ability to use Multicore Manager (MCMGR) as the IPC interrupts router (RL_USE_MCMGR_IPC_ISR_HANDLER config) </p>
+</td></tr>
+<tr>
+<td>4.0 </td><td>04/2018 </td><td><p class="starttd">New API <a class="el" href="group__rpmsg__queue.html#ga472e6156fa4a705fb5023bbfb2838196" title="This function returns the number of pending messages in the queue. ">rpmsg_queue_get_current_size()</a> </p>
+<p>Fixed bug in interrupt handling for lpc5411x, lpc5410x </p>
+<p class="endtd">Code adjustments based on static analysis tool findings </p>
+</td></tr>
+<tr>
+<td>5.0 </td><td>09/2018 </td><td><p class="starttd">Align porting layers to the updated MCUXpressoSDK feature files </p>
+<p class="endtd">Allow rpmsg-lite build by Keil MDK ArmClangV6 compiler </p>
 </td></tr>
 </table>
 </div></div><!-- contents -->

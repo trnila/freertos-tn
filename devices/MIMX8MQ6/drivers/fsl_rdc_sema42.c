@@ -1,34 +1,8 @@
 /*
- * The Clear BSD License
  * Copyright 2017 NXP
  * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted (subject to the limitations in the disclaimer below) provided
- *  that the following conditions are met:
  *
- * o Redistributions of source code must retain the above copyright notice, this list
- *   of conditions and the following disclaimer.
- *
- * o Redistributions in binary form must reproduce the above copyright notice, this
- *   list of conditions and the following disclaimer in the documentation and/or
- *   other materials provided with the distribution.
- *
- * o Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from this
- *   software without specific prior written permission.
- *
- * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS LICENSE.
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "fsl_rdc_sema42.h"
@@ -36,6 +10,12 @@
 /******************************************************************************
  * Definitions
  *****************************************************************************/
+
+/* Component ID definition, used by tools. */
+#ifndef FSL_COMPONENT_ID
+#define FSL_COMPONENT_ID "platform.drivers.rdc_sema42"
+#endif
+
 /* The first number write to RSTGDP when reset RDC_SEMA42 gate. */
 #define RDC_SEMA42_GATE_RESET_PATTERN_1 (0xE2U)
 /* The second number write to RSTGDP when reset RDC_SEMA42 gate. */
@@ -86,6 +66,16 @@ uint32_t RDC_SEMA42_GetInstance(RDC_SEMAPHORE_Type *base)
     return instance;
 }
 
+/*!
+ * brief Initializes the RDC_SEMA42 module.
+ *
+ * This function initializes the RDC_SEMA42 module. It only enables the clock but does
+ * not reset the gates because the module might be used by other processors
+ * at the same time. To reset the gates, call either RDC_SEMA42_ResetGate or
+ * RDC_SEMA42_ResetAllGates function.
+ *
+ * param base RDC_SEMA42 peripheral base address.
+ */
 void RDC_SEMA42_Init(RDC_SEMAPHORE_Type *base)
 {
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
@@ -93,6 +83,13 @@ void RDC_SEMA42_Init(RDC_SEMAPHORE_Type *base)
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 }
 
+/*!
+ * brief De-initializes the RDC_SEMA42 module.
+ *
+ * This function de-initializes the RDC_SEMA42 module. It only disables the clock.
+ *
+ * param base RDC_SEMA42 peripheral base address.
+ */
 void RDC_SEMA42_Deinit(RDC_SEMAPHORE_Type *base)
 {
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
@@ -100,6 +97,20 @@ void RDC_SEMA42_Deinit(RDC_SEMAPHORE_Type *base)
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 }
 
+/*!
+ * brief Tries to lock the RDC_SEMA42 gate.
+ *
+ * This function tries to lock the specific RDC_SEMA42 gate. If the gate has been
+ * locked by another processor, this function returns an error code.
+ *
+ * param base RDC_SEMA42 peripheral base address.
+ * param gateNum  Gate number to lock.
+ * param masterIndex  Current processor master index.
+ * param domainId  Current processor domain ID.
+ *
+ * retval kStatus_Success   Lock the sema42 gate successfully.
+ * retval kStatus_Failed    Sema42 gate has been locked by another processor.
+ */
 status_t RDC_SEMA42_TryLock(RDC_SEMAPHORE_Type *base, uint8_t gateNum, uint8_t masterIndex, uint8_t domainId)
 {
     assert(gateNum < RDC_SEMA42_GATE_COUNT);
@@ -123,6 +134,18 @@ status_t RDC_SEMA42_TryLock(RDC_SEMAPHORE_Type *base, uint8_t gateNum, uint8_t m
     return status;
 }
 
+/*!
+ * brief Locks the RDC_SEMA42 gate.
+ *
+ * This function locks the specific RDC_SEMA42 gate. If the gate has been
+ * locked by other processors, this function waits until it is unlocked and then
+ * lock it.
+ *
+ * param base RDC_SEMA42 peripheral base address.
+ * param gateNum  Gate number to lock.
+ * param masterIndex  Current processor master index.
+ * param domainId  Current processor domain ID.
+ */
 void RDC_SEMA42_Lock(RDC_SEMAPHORE_Type *base, uint8_t gateNum, uint8_t masterIndex, uint8_t domainId)
 {
     assert(gateNum < RDC_SEMA42_GATE_COUNT);
@@ -145,6 +168,15 @@ void RDC_SEMA42_Lock(RDC_SEMAPHORE_Type *base, uint8_t gateNum, uint8_t masterIn
     }
 }
 
+/*!
+ * brief Gets which domain has currently locked the gate.
+ *
+ * param base RDC_SEMA42 peripheral base address.
+ * param gateNum  Gate number.
+ *
+ * return Return -1 if the gate is not locked by any domain, otherwise return the
+ * domain ID.
+ */
 int32_t RDC_SEMA42_GetLockDomainID(RDC_SEMAPHORE_Type *base, uint8_t gateNum)
 {
     assert(gateNum < RDC_SEMA42_GATE_COUNT);
@@ -162,6 +194,17 @@ int32_t RDC_SEMA42_GetLockDomainID(RDC_SEMAPHORE_Type *base, uint8_t gateNum)
     }
 }
 
+/*!
+ * brief Resets the RDC_SEMA42 gate to an unlocked status.
+ *
+ * This function resets a RDC_SEMA42 gate to an unlocked status.
+ *
+ * param base RDC_SEMA42 peripheral base address.
+ * param gateNum  Gate number.
+ *
+ * retval kStatus_Success         RDC_SEMA42 gate is reset successfully.
+ * retval kStatus_Failed Some other reset process is ongoing.
+ */
 status_t RDC_SEMA42_ResetGate(RDC_SEMAPHORE_Type *base, uint8_t gateNum)
 {
     status_t status;

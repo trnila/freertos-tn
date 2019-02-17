@@ -1,35 +1,9 @@
 /*
- * The Clear BSD License
  * Copyright (c) 2016, Freescale Semiconductor, Inc.
  * Copyright 2016-2017 NXP
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted (subject to the limitations in the disclaimer below) provided
- * that the following conditions are met:
- *
- * o Redistributions of source code must retain the above copyright notice, this list
- *   of conditions and the following disclaimer.
- *
- * o Redistributions in binary form must reproduce the above copyright notice, this
- *   list of conditions and the following disclaimer in the documentation and/or
- *   other materials provided with the distribution.
- *
- * o Neither the name of the copyright holder nor the names of its
- *   contributors may be used to endorse or promote products derived from this
- *   software without specific prior written permission.
- *
- * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS LICENSE.
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "fsl_pwm.h"
@@ -37,6 +11,11 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
+
+/* Component ID definition, used by tools. */
+#ifndef FSL_COMPONENT_ID
+#define FSL_COMPONENT_ID "platform.drivers.ipwm"
+#endif
 
 /*******************************************************************************
  * Prototypes
@@ -67,7 +46,7 @@ static const clock_ip_name_t s_pwmClock[] = PWM_CLOCKS;
 static uint32_t PWM_GetInstance(PWM_Type *base)
 {
     uint32_t instance;
-    uint32_t pwmArrayCount = (sizeof(s_pwmBases)/sizeof(s_pwmBases[0]));
+    uint32_t pwmArrayCount = (sizeof(s_pwmBases) / sizeof(s_pwmBases[0]));
 
     /* Find the instance index from base address mappings. */
     for (instance = 0; instance < pwmArrayCount; instance++)
@@ -83,24 +62,41 @@ static uint32_t PWM_GetInstance(PWM_Type *base)
     return instance;
 }
 
+/*!
+ * brief Ungates the PWM clock and configures the peripheral for basic operation.
+ *
+ * note This API should be called at the beginning of the application using the PWM driver.
+ *
+ * param base      PWM peripheral base address
+ * param config    Pointer to user's PWM config structure.
+ *
+ * return kStatus_Success means success; else failed.
+ */
 status_t PWM_Init(PWM_Type *base, const pwm_config_t *config)
 {
     assert(config);
-	
+
 #if !(defined(FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL) && FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL)
     /* Ungate PWM clock */
     CLOCK_EnableClock(s_pwmClock[PWM_GetInstance(base)]);
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
-    
+
     /* Setup the PWM operation */
-    base->PWMCR = (PWM_PWMCR_REPEAT(config->sampleRepeat) | PWM_PWMCR_PRESCALER(config->prescale) | PWM_PWMCR_CLKSRC(config->clockSource) |
-                    PWM_PWMCR_POUTC(config->outputConfig) | PWM_PWMCR_HCTR(config->halfWordSwap) | PWM_PWMCR_BCTR(config->byteSwap) |
-                    PWM_PWMCR_STOPEN(config->enableStopMode) | PWM_PWMCR_DBGEN(config->enableDebugMode) | PWM_PWMCR_WAITEN(config->enableWaitMode) |
-                    PWM_PWMCR_DOZEN(config->enableDozeMode) | PWM_PWMCR_FWM(config->fifoWater));
+    base->PWMCR = (PWM_PWMCR_REPEAT(config->sampleRepeat) | PWM_PWMCR_PRESCALER(config->prescale) |
+                   PWM_PWMCR_CLKSRC(config->clockSource) | PWM_PWMCR_POUTC(config->outputConfig) |
+                   PWM_PWMCR_HCTR(config->halfWordSwap) | PWM_PWMCR_BCTR(config->byteSwap) |
+                   PWM_PWMCR_STOPEN(config->enableStopMode) | PWM_PWMCR_DBGEN(config->enableDebugMode) |
+                   PWM_PWMCR_WAITEN(config->enableWaitMode) | PWM_PWMCR_DOZEN(config->enableDozeMode) |
+                   PWM_PWMCR_FWM(config->fifoWater));
 
     return kStatus_Success;
 }
 
+/*!
+ * brief Gate the PWM submodule clock
+ *
+ * param base      PWM peripheral base address
+ */
 void PWM_Deinit(PWM_Type *base)
 {
     /* Set clock source to none to disable counter */
@@ -112,9 +108,31 @@ void PWM_Deinit(PWM_Type *base)
 #endif /* FSL_SDK_DISABLE_DRIVER_CLOCK_CONTROL */
 }
 
+/*!
+ * brief  Fill in the PWM config struct with the default settings
+ *
+ * The default values are:
+ * code
+ *   config->enableStopMode = false;
+ *   config->enableDozeMode = false;
+ *   config->enableWaitMode = false;
+ *   config->enableDozeMode = false;
+ *   config->clockSource = kPWM_LowFrequencyClock;
+ *   config->prescale = 0U;
+ *   config->outputConfig = kPWM_SetAtRolloverAndClearAtcomparison;
+ *   config->fifoWater = kPWM_FIFOWaterMark_2;
+ *   config->sampleRepeat = kPWM_EachSampleOnce;
+ *   config->byteSwap = kPWM_ByteNoSwap;
+ *   config->halfWordSwap = kPWM_HalfWordNoSwap;
+ * endcode
+ * param config Pointer to user's PWM config structure.
+ */
 void PWM_GetDefaultConfig(pwm_config_t *config)
 {
     assert(config);
+
+    /* Initializes the configure structure to zero. */
+    memset(config, 0, sizeof(*config));
 
     /* Stop mode disabled */
     config->enableStopMode = false;

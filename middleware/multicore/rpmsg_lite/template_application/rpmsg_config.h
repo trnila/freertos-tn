@@ -42,6 +42,8 @@
 
 #define RL_USE_STATIC_API (1)
 
+#define RL_USE_MCMGR_IPC_ISR_HANDLER (1)
+
 #define RL_ASSERT(x)  \
     do                \
     {                 \

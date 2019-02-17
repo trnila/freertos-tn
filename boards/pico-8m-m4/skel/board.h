@@ -43,10 +43,10 @@
 #define MANUFACTURER_NAME "NXP"
 #define BOARD_DOMAIN_ID                       (1)
 /* The UART to use for debug messages. */
-#define BOARD_DEBUG_UART_TYPE DEBUG_CONSOLE_DEVICE_TYPE_UART
+#define BOARD_DEBUG_UART_TYPE kSerialPort_Uart
 #define BOARD_DEBUG_UART_BAUDRATE 115200u
 #define BOARD_DEBUG_UART_BASEADDR UART3_BASE
-#define BOARD_DEBUG_UART_INSTANCE 2U
+#define BOARD_DEBUG_UART_INSTANCE 3U
 #define BOARD_DEBUG_UART_CLK_FREQ                                                          \
     CLOCK_GetPllFreq(kCLOCK_SystemPll1Ctrl) / (CLOCK_GetRootPreDivider(kCLOCK_RootUart3)) / \
         (CLOCK_GetRootPostDivider(kCLOCK_RootUart3)) / 10

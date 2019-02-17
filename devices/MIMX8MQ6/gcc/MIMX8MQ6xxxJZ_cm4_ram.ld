@@ -1,46 +1,18 @@
 /*
 ** ###################################################################
-**     Processors:          MIMX8MQ6DVAJZ
-**                          MIMX8MQ6DZKJZ
-**
+**     Processor:           MIMX8MQ6DVAJZ
 **     Compiler:            GNU C Compiler
-**     Reference manual:    IMX8MQRM, Rev. C, Jul. 2017
-**     Version:             rev. 3.0, 2017-07-19
-**     Build:               b170801
+**     Reference manual:    IMX8MDQLQRM, Rev. 0, Jan. 2018
+**     Version:             rev. 4.0, 2018-01-26
+**     Build:               b180820
 **
 **     Abstract:
 **         Linker file for the GNU C Compiler
 **
-**     The Clear BSD License
 **     Copyright 2016 Freescale Semiconductor, Inc.
-**     Copyright 2016-2017 NXP
-**     All rights reserved.
-**     Redistribution and use in source and binary forms, with or without modification,
-**     are permitted (subject to the limitations in the disclaimer below) provided that 
-**     the following conditions are met:
+**     Copyright 2016-2018 NXP
 **
-**     1. Redistributions of source code must retain the above copyright notice, this list
-**       of conditions and the following disclaimer.
-**
-**     2. Redistributions in binary form must reproduce the above copyright notice, this
-**       list of conditions and the following disclaimer in the documentation and/or
-**       other materials provided with the distribution.
-**
-**     3. Neither the name of the copyright holder nor the names of its
-**       contributors may be used to endorse or promote products derived from this
-**       software without specific prior written permission.
-**
-**     NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS LICENSE.
-**     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-**     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-**     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-**     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-**     ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-**     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-**     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-**     ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-**     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-**     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+**     SPDX-License-Identifier: BSD-3-Clause
 **
 **     http:                 www.nxp.com
 **     mail:                 support@nxp.com
@@ -60,12 +32,13 @@ MEMORY
   m_interrupts          (RX)  : ORIGIN = 0x1FFE0000, LENGTH = 0x00000240
   m_text                (RX)  : ORIGIN = 0x1FFE0240, LENGTH = 0x0001FDC0
   m_data                (RW)  : ORIGIN = 0x20000000, LENGTH = 0x00020000
+  m_data2               (RW)  : ORIGIN = 0x80000000, LENGTH = 0x01000000
 }
 
 /* Define output sections */
 SECTIONS
 {
-  /* The startup code goes first into internal RAM */
+/* The startup code goes first into internal RAM */
   .interrupts :
   {
     __VECTOR_TABLE = .;
@@ -73,9 +46,6 @@ SECTIONS
     KEEP(*(.isr_vector))     /* Startup code */
     . = ALIGN(4);
   } > m_interrupts
-
-  __VECTOR_RAM = __VECTOR_TABLE;
-  __RAM_VECTOR_TABLE_SIZE_BYTES = 0x0;
 
     /* The program code and other data goes into internal RAM */
   .text :
@@ -188,7 +158,7 @@ SECTIONS
     *(NonCacheable.init)
     . = ALIGN(4);
     __noncachedata_init_end__ = .;   /* create a global symbol at initialized ncache data end */
-  } > m_data
+  } > m_data2
 
   . = __noncachedata_init_end__;
   .ncache :
@@ -196,7 +166,7 @@ SECTIONS
     *(NonCacheable)
     . = ALIGN(4);
     __noncachedata_end__ = .;     /* define a global symbol at ncache data end */
-  } > m_data
+  } > m_data2
 
   __DATA_END = __DATA_ROM + (__data_end__ - __data_start__);
   text_end = ORIGIN(m_text) + LENGTH(m_text);

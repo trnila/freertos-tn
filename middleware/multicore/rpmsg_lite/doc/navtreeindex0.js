@@ -1,5 +1,14 @@
 var NAVTREEINDEX0 =
 {
+"group__config.html":[1,3],
+"group__config.html#ga1b30d0352059e95ffe6075ade6373c16":[1,3,7],
+"group__config.html#ga1b73e9943f6d0786eee8e91020cdca29":[1,3,8],
+"group__config.html#ga287167874db5209903c7e391013ab485":[1,3,5],
+"group__config.html#ga4e0599085aeaa1fc8824015826c1e56b":[1,3,2],
+"group__config.html#ga8a47e919e7dcb7ba81ad9f315cf14d8d":[1,3,6],
+"group__config.html#ga931a9f16ee1aa309020c74cfe2eabf1f":[1,3,4],
+"group__config.html#gab1d9d807155917143be3785751c67f79":[1,3,1],
+"group__config.html#gab9a566c2e720eaa10348e84d35f8dde9":[1,3,3],
 "group__rpmsg__lite.html":[1,0],
 "group__rpmsg__lite.html#a0004491e023ed2e999182ba302fa32e5":[1,0,2,8],
 "group__rpmsg__lite.html#a17ae507517bfe8f585893b5f61b953f6":[1,0,2,7],
@@ -48,6 +57,7 @@ var NAVTREEINDEX0 =
 "group__rpmsg__ns.html#structrpmsg__ns__static__context__container":[1,2,2],
 "group__rpmsg__queue.html":[1,1],
 "group__rpmsg__queue.html#ga119b346b47ed2fddee31a80de73bfa11":[1,1,5],
+"group__rpmsg__queue.html#ga472e6156fa4a705fb5023bbfb2838196":[1,1,7],
 "group__rpmsg__queue.html#ga5333db7bb4b09c87ae4ad9c75dc610a5":[1,1,1],
 "group__rpmsg__queue.html#ga90d72e18752f3dad3cf9cab348186e6b":[1,1,3],
 "group__rpmsg__queue.html#gaa6d197ceb3befc71d29f7b4a969d3d3e":[1,1,0],

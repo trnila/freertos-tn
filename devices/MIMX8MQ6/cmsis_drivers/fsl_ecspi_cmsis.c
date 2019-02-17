@@ -20,6 +20,11 @@
 
 #include "fsl_ecspi_cmsis.h"
 
+/* Component ID definition, used by tools. */
+#ifndef FSL_COMPONENT_ID
+#define FSL_COMPONENT_ID "platform.drivers.ecspi_cmsis"
+#endif
+
 #if (RTE_SPI1 || RTE_SPI2 || RTE_SPI3)
 
 #define ARM_SPI_DRV_VERSION ARM_DRIVER_VERSION_MAJOR_MINOR(2, 0) /* driver version */
@@ -28,7 +33,7 @@
  * ARMCC does not support split the data section automatically, so the driver
  * needs to split the data to separate sections explicitly, to reduce codesize.
  */
-#if defined(__CC_ARM)
+#if defined(__CC_ARM) || defined(__ARMCC_VERSION)
 #define ARMCC_SECTION(section_name) __attribute__((section(section_name)))
 #endif
 
@@ -1095,7 +1100,7 @@ cmsis_ecspi_sdma_resource_t ECSPI1_SDMAResource = {
     &ECSPI1_TxSdmaContext,       RTE_SPI1_DMA_RX_DMA_BASE, RTE_SPI1_DMA_RX_CH,         RTE_SPI1_DMA_RX_CH_REQUEST,
     RTE_SPI1_DMA_RX_CH_PRIORITY, &ECSPI1_RxSdmaContext};
 
-#if defined(__CC_ARM)
+#if defined(__CC_ARM) || defined(__ARMCC_VERSION)
 ARMCC_SECTION("ecspi1_sdma_driver_state")
 static cmsis_ecspi_sdma_driver_state_t ECSPI1_SDMADriverState = {
 #else
@@ -1154,7 +1159,7 @@ static ARM_SPI_STATUS ECSPI1_SDMAGetStatus(void)
 
 static ecspi_master_handle_t ECSPI1_Handle;
 
-#if defined(__CC_ARM)
+#if defined(__CC_ARM) || defined(__ARMCC_VERSION)
 ARMCC_SECTION("ecspi1_interrupt_driver_state")
 static cmsis_ecspi_interrupt_driver_state_t ECSPI1_InterruptDriverState = {
 #else
@@ -1251,7 +1256,7 @@ cmsis_ecspi_sdma_resource_t ECSPI2_SDMAResource = {
     &ECSPI2_TxSdmaContext,       RTE_SPI2_DMA_RX_DMA_BASE, RTE_SPI2_DMA_RX_CH,         RTE_SPI2_DMA_RX_CH_REQUEST,
     RTE_SPI2_DMA_RX_CH_PRIORITY, &ECSPI2_RxSdmaContext};
 
-#if defined(__CC_ARM)
+#if defined(__CC_ARM) || defined(__ARMCC_VERSION)
 ARMCC_SECTION("ecspi2_sdma_driver_state")
 static cmsis_ecspi_sdma_driver_state_t ECSPI2_SDMADriverState = {
 #else
@@ -1312,7 +1317,7 @@ static ARM_SPI_STATUS ECSPI2_SDMAGetStatus(void)
 
 static ecspi_master_handle_t ECSPI2_Handle;
 
-#if defined(__CC_ARM)
+#if defined(__CC_ARM) || defined(__ARMCC_VERSION)
 ARMCC_SECTION("ecspi2_interrupt_driver_state")
 static cmsis_ecspi_interrupt_driver_state_t ECSPI2_InterruptDriverState = {
 #else
@@ -1409,7 +1414,7 @@ cmsis_ecspi_sdma_resource_t ECSPI3_SDMAResource = {
     &ECSPI3_TxSdmaContext,       RTE_SPI3_DMA_RX_DMA_BASE, RTE_SPI3_DMA_RX_CH,         RTE_SPI3_DMA_RX_CH_REQUEST,
     RTE_SPI3_DMA_RX_CH_PRIORITY, &ECSPI3_RxSdmaContext};
 
-#if defined(__CC_ARM)
+#if defined(__CC_ARM) || defined(__ARMCC_VERSION)
 ARMCC_SECTION("ecspi3_sdma_driver_state")
 static cmsis_ecspi_sdma_driver_state_t ECSPI3_SDMADriverState = {
 #else
@@ -1470,7 +1475,7 @@ static ARM_SPI_STATUS ECSPI3_SDMAGetStatus(void)
 
 static ecspi_master_handle_t ECSPI3_Handle;
 
-#if defined(__CC_ARM)
+#if defined(__CC_ARM) || defined(__ARMCC_VERSION)
 ARMCC_SECTION("ecspi3_interrupt_driver_state")
 static cmsis_ecspi_interrupt_driver_state_t ECSPI3_InterruptDriverState = {
 #else

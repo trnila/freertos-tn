@@ -1,53 +1,26 @@
 /*
 ** ###################################################################
 **     Processors:          MIMX8MQ6CVAHZ
-**                          MIMX8MQ6CZKHZ
 **                          MIMX8MQ6DVAJZ
-**                          MIMX8MQ6DZKJZ
 **
 **     Compilers:           Keil ARM C/C++ Compiler
 **                          GNU C Compiler
 **                          IAR ANSI C/C++ Compiler for ARM
 **
-**     Reference manual:    IMX8MQRM, Rev. C, Jul. 2017
-**     Version:             rev. 3.0, 2017-07-19
-**     Build:               b170804
+**     Reference manual:    IMX8MDQLQRM, Rev. 0, Jan. 2018
+**     Version:             rev. 4.0, 2018-01-26
+**     Build:               b180903
 **
 **     Abstract:
 **         Provides a system configuration function and a global variable that
 **         contains the system frequency. It configures the device and initializes
 **         the oscillator (PLL) that is part of the microcontroller device.
 **
-**     The Clear BSD License
 **     Copyright 2016 Freescale Semiconductor, Inc.
-**     Copyright 2016-2017 NXP
+**     Copyright 2016-2018 NXP
 **     All rights reserved.
-**     Redistribution and use in source and binary forms, with or without modification,
-**     are permitted (subject to the limitations in the disclaimer below) provided that 
-**     the following conditions are met:
 **
-**     1. Redistributions of source code must retain the above copyright notice, this list
-**       of conditions and the following disclaimer.
-**
-**     2. Redistributions in binary form must reproduce the above copyright notice, this
-**       list of conditions and the following disclaimer in the documentation and/or
-**       other materials provided with the distribution.
-**
-**     3. Neither the name of the copyright holder nor the names of its
-**       contributors may be used to endorse or promote products derived from this
-**       software without specific prior written permission.
-**
-**     NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS LICENSE.
-**     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-**     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-**     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-**     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-**     ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-**     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-**     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-**     ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-**     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-**     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+**     SPDX-License-Identifier: BSD-3-Clause
 **
 **     http:                 www.nxp.com
 **     mail:                 support@nxp.com
@@ -59,14 +32,16 @@
 **         Rev.B Header EAR1
 **     - rev. 3.0 (2017-07-19)
 **         Rev.C Header EAR2
+**     - rev. 4.0 (2018-01-26)
+**         Rev.D Header RFP
 **
 ** ###################################################################
 */
 
 /*!
  * @file MIMX8MQ6_cm4
- * @version 3.0
- * @date 2017-07-19
+ * @version 4.0
+ * @date 2018-01-26
  * @brief Device specific configuration file for MIMX8MQ6_cm4 (header file)
  *
  * Provides a system configuration function and a global variable that contains
@@ -124,6 +99,18 @@ void SystemInit (void);
  * the current core clock.
  */
 void SystemCoreClockUpdate (void);
+
+/**
+ * @brief SystemInit function hook.
+ *
+ * This weak function allows to call specific initialization code during the
+ * SystemInit() execution.This can be used when an application specific code needs
+ * to be called as close to the reset entry as possible (for example the Multicore
+ * Manager MCMGR_EarlyInit() function call).
+ * NOTE: No global r/w variables can be used in this hook function because the
+ * initialization of these variables happens after this function.
+ */
+void SystemInitHook (void);
 
 #ifdef __cplusplus
 }
