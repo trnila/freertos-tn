@@ -23,7 +23,11 @@
 void BOARD_InitDebugConsole(void)
 {
 		uint32_t uartClkSrcFreq = BOARD_DEBUG_UART_CLK_FREQ;
+
+		CLOCK_SetRootMux(kCLOCK_RootUart3, kCLOCK_UartRootmuxSysPll1Div10); /* Set UART source to SysPLL1 Div10 80MHZ */
+		CLOCK_SetRootDivider(kCLOCK_RootUart3, 1U, 1U);                  /* Set root clock to 80MHZ/ 1= 80MHZ */   
 		CLOCK_EnableClock(kCLOCK_Uart3);
+
 		DbgConsole_Init(BOARD_DEBUG_UART_INSTANCE, BOARD_DEBUG_UART_BAUDRATE, DEBUG_CONSOLE_DEVICE_TYPE_UART, uartClkSrcFreq);
 
 		IOMUXC_SetPinMux(IOMUXC_UART3_RXD_UART3_RX, 0U);
