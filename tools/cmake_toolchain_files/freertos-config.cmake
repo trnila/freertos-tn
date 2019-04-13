@@ -37,7 +37,7 @@ add_library(freertos
 
 target_include_directories(freertos
 	PUBLIC
-	"${M4SDK_PATH}/boards/pico-8m-m4/skel/"
+	"${M4SDK_PATH}/template/"
 	"${M4SDK_PATH}/rtos/amazon-freertos/lib/include/"
 	"${M4SDK_PATH}/rtos/amazon-freertos/lib/FreeRTOS/portable/GCC/ARM_CM4F/"
 	"${M4SDK_PATH}/rtos/amazon-freertos/lib/include/private/"

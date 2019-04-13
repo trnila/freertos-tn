@@ -29,7 +29,7 @@ set(CMAKE_C_FLAGS "${COMMON_FLAGS}")
 set(CMAKE_CXX_FLAGS "${COMMON_FLAGS} -fno-rtti -fno-exceptions --specs=nosys.specs")
 set(CMAKE_EXE_LINKER_FLAGS "${COMMON_FLAGS} --specs=nano.specs --specs=nosys.specs -Xlinker --gc-sections -Xlinker -static -Xlinker -z -Xlinker muldefs")
 
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -T${M4SDK_PATH}/boards/pico-8m-m4/skel/MIMX8MQ6xxxJZ_cm4_ram.ld -static")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -T${M4SDK_PATH}/template/MIMX8MQ6xxxJZ_cm4_ram.ld -static")
 
 function(add_firmware target)
   add_executable(${ARGV})
@@ -38,13 +38,13 @@ function(add_firmware target)
 endfunction()
 
 add_library(mcuxpressosdk  
-  "${M4SDK_PATH}/boards/pico-8m-m4/skel/fsl_iomuxc.h"
-  "${M4SDK_PATH}/boards/pico-8m-m4/skel/pin_mux.h"
-  "${M4SDK_PATH}/boards/pico-8m-m4/skel/board.c"
-  "${M4SDK_PATH}/boards/pico-8m-m4/skel/board.h"
-  "${M4SDK_PATH}/boards/pico-8m-m4/skel/clock_config.c"
-  "${M4SDK_PATH}/boards/pico-8m-m4/skel/clock_config.h"
-  "${M4SDK_PATH}/boards/pico-8m-m4/skel/rpmsg_config.h"
+  "${M4SDK_PATH}/template/fsl_iomuxc.h"
+  "${M4SDK_PATH}/template/pin_mux.h"
+  "${M4SDK_PATH}/template/board.c"
+  "${M4SDK_PATH}/template/board.h"
+  "${M4SDK_PATH}/template/clock_config.c"
+  "${M4SDK_PATH}/template/clock_config.h"
+  "${M4SDK_PATH}/template/rpmsg_config.h"
   "${M4SDK_PATH}/devices/MIMX8MQ6/drivers/fsl_clock.h"
   "${M4SDK_PATH}/devices/MIMX8MQ6/drivers/fsl_clock.c"
   "${M4SDK_PATH}/devices/MIMX8MQ6/drivers/fsl_common.h"
@@ -95,5 +95,5 @@ target_include_directories(mcuxpressosdk
     ${M4SDK_PATH}/devices/MIMX8MQ6/utilities
     ${M4SDK_PATH}/components/serial_manager
     ${M4SDK_PATH}/components/uart
-    ${M4SDK_PATH}/boards/pico-8m-m4/skel/
+    ${M4SDK_PATH}/template/
 )
