@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include <stdio.h>
 #include "fsl_common.h"
 #include "fsl_debug_console.h"
 #include "board.h"
@@ -133,8 +134,8 @@ __attribute__((weak)) void MemManage_Handler(void) {
 	uint32_t bfar    = SCB->BFAR;    // address of location that generated busfault
 
 	printf("MemManage fault\r\n");
-	printf("cfsr = %x\r\n", cfsr);
-	printf("mmfar = %x\r\n", mmfar);
-	printf("bfar = %x\r\n", bfar);
+	printf("cfsr = %lx\r\n", cfsr);
+	printf("mmfar = %lx\r\n", mmfar);
+	printf("bfar = %lx\r\n", bfar);
 	for(;;);
 }
