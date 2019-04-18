@@ -126,6 +126,16 @@ __attribute__((weak)) void HardFault_Handler(void) {
 }
 
 __attribute__((weak)) void MemManage_Handler(void) {
+	asm(
+			"tst lr, #0b0100\n"
+			"ite eq\n"
+			"mrseq r0, msp\n"
+			"mrsne r0, psp\n"
+			"b handle_memmanage"
+	);
+}
+
+void handle_memmanage(uint32_t* regs) {
 	// [0] - fetch from non-executable location
 	// [1] - load/store from non-accessible location
 	uint32_t cfsr    = SCB->CFSR;
@@ -133,9 +143,17 @@ __attribute__((weak)) void MemManage_Handler(void) {
 	uint32_t mmfar = SCB->MMFAR; // address of location that generated memmanage fault
 	uint32_t bfar    = SCB->BFAR;    // address of location that generated busfault
 
-	printf("MemManage fault\r\n");
-	printf("cfsr = %lx\r\n", cfsr);
-	printf("mmfar = %lx\r\n", mmfar);
-	printf("bfar = %lx\r\n", bfar);
+	printf("\r\nMemManage fault\r\n");
+	printf("cfsr  = %8lx ", cfsr);
+	printf("mmfar = %8lx ", mmfar);
+	printf(" bfar = %8lx\r\n", bfar);
+	printf("   pc = %8lx ", regs[6]);
+	printf("   sp = %8lx ", regs[8]);
+	printf("   lr = %8lx\r\n", regs[5]);
+	printf("   r0 = %8lx ", regs[0]);
+	printf("   r1 = %8lx ", regs[1]);
+	printf("   r2 = %8lx ", regs[2]);
+	printf("r3 = %8lx ", regs[3]);
+	printf("r12 = %8lx\r\n", regs[4]);
 	for(;;);
 }
